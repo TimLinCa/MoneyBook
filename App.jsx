@@ -5,7 +5,7 @@
  * @format
  */
 import React from 'react';
-import Tabs from './navigation/Tabs';
+import Tabs from './src/navigations/Tabs';
 import { NavigationContainer } from '@react-navigation/native';
 function App() {
   // const isDarkMode = useColorScheme() === 'dark';

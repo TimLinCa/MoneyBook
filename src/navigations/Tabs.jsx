@@ -1,12 +1,12 @@
 import React from 'react'; // Import the 'React' module
 
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import SettingPage from '../components/SettingPage';
-import Analysis from '../components/Analysis';
-import AccountPage from '../components/AccountPage';
-import HomePage from '../components/HomePage';
+import SettingPage from '../pages/SettingPage';
+import Analysis from '../pages/Analysis';
+import AccountPage from '../pages/AccountPage';
+import HomePage from '../pages/HomePage';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { COLORS } from '../styles';
+import { COLORS } from '../../styles';
 
 
 function TabBarIcon({ focused, color, size, route }) {

@@ -4,7 +4,7 @@ import axios from "axios";
 import { Button } from '@rneui/themed';
 import { useState } from "react";
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { COLORS, SIZES, FONTS } from '../styles';
+import { COLORS, SIZES, FONTS } from '../../styles';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 const address = '10.0.0.153';
