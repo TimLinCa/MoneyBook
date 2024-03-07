@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import axios from "axios";
 import { Button } from '@rneui/themed';
 import { useState } from "react";
@@ -7,6 +7,10 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { COLORS, SIZES, FONTS } from '../../styles';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { NavigationContainer } from '@react-navigation/native';
+import MainAsset from '../components/main/MainAsset';
+import MainDebt from '../components/main/MainDebt';
+import MainBudget from "../components/main/MainBudget";
+import { SafeAreaView } from "react-native-safe-area-context";
 const address = '10.0.0.153';
 axios.defaults.baseURL = `http://${address}:8080`;
 
@@ -14,21 +18,6 @@ axios.defaults.baseURL = `http://${address}:8080`;
 
 
 const Tab = createMaterialTopTabNavigator();
-function Page1() {
-    return (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            <Text>Page 1!</Text>
-        </View>
-    );
-}
-
-function Page2() {
-    return (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            <Text>Page 2!</Text>
-        </View>
-    );
-}
 
 function renderheader() {
     return (
@@ -51,7 +40,7 @@ function renderheader() {
                         marginTop: SIZES.padding * 2,
                         width: '100%',
                         alighItems: 'flex-end',
-                        paddingHorizontal: 5
+                        paddingHorizontal: 5,
                     }
                     }>
                     <View>
@@ -77,25 +66,7 @@ function renderheader() {
 
 function renderSummaryInfo() {
     return (
-        <TouchableOpacity style={{
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            top: SIZES.height * 0.1718,
-            height: SIZES.height * 0.73,
-            backgroundColor: COLORS.white,
-            marginLeft: SIZES.padding,
-            marginRight: SIZES.padding,
-            shadowColor: '#000000',
-            shadowOpacity: 0.8,
-            shadowRadius: 4,
-            shadowOffset: {
-                height: 2,
-                width: 2,
-            },
-            borderRadius: 20,
-            flexDirection: 'column',
-        }}>
+        <TouchableOpacity style={styles.summaryInfo}>
             <View>
                 <View style={{ flexDirection: 'row', height: SIZES.height * 0.045 }}>
                     <View style={{ flex: 1 }}>
@@ -111,23 +82,33 @@ function renderSummaryInfo() {
             </View>
             <View style={{ backgroundColor: COLORS.white, flex: 1, borderRadius: 20, paddingBottom: SIZES.padding, paddingLeft: SIZES.padding, paddingRight: SIZES.padding }} >
                 <NavigationContainer independent={true}>
-
                     <Tab.Navigator
                         screenOptions={{
-                            tabBarLabelStyle: { fontSize: SIZES.body5, fontWeight: 'bold' },
-                            tabBarStyle: { backgroundColor: COLORS.lightGray, borderRadius: 20, margin: SIZES.padding, width: '99.9%', height: '5%', alignSelf: 'center', alignContent: 'center' },
                             tabBarInactiveTintColor: 'gray',
                             tabBarActiveTintColor: 'black',
-                            tabBarIndicatorStyle: { borderRadius: 20, backgroundColor: 'white', height: '90%', alignItems: 'center', justifyContent: 'center' },
+                            tabBarIndicatorStyle: { borderRadius: 20, backgroundColor: 'white', height: '100%', alignSelf: 'center', alignContent: 'center' },
+                            tabBarIndicatorContainerStyle: { width: '100%' },
+                            tabBarLabelStyle: { fontSize: SIZES.body5, fontWeight: 'bold' },
+                            tabBarStyle: { backgroundColor: COLORS.lightGray, borderRadius: 20, margin: SIZES.padding, width: '99.9%', height: '10%', alignSelf: 'center' },
+                            tabBarContentContainerStyle: { alignItems: 'center', alignSelf: 'center' }
                         }}
                     >
-                        <Tab.Screen name="Asset" component={Page1} />
-                        <Tab.Screen name="DEBT" component={Page2} />
+                        <Tab.Screen name="Asset" component={MainAsset} />
+                        <Tab.Screen name="DEBT" component={MainDebt} />
                     </Tab.Navigator>
                 </NavigationContainer>
             </View>
         </TouchableOpacity >
 
+    );
+}
+
+function renderBudgetInfo() {
+    return (
+        <View style={styles.budgetInfo}>
+            <MainBudget style={styles.BudgetBar} name="Grocery" max={2000} min={0} value={500} barWidth={SIZES.width * 0.65} />
+            <MainBudget style={styles.BudgetBar} name="Gasoline" max={1000} min={0} value={800} barWidth={SIZES.width * 0.65} />
+        </View>
     );
 }
 
@@ -145,10 +126,11 @@ function HomePage() {
 
 
     return (
-        <View style={{ flex: 1, paddingBottom: 10 }}>
+        <SafeAreaView style={{ flex: 1, paddingBottom: 10 }}>
             {renderheader()}
             {renderSummaryInfo()}
-        </View>
+            {renderBudgetInfo()}
+        </SafeAreaView>
     );
 }
 
@@ -162,6 +144,47 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.29,
         shadowRadius: 4.65,
         elevation: 7,
+    },
+    summaryInfo: {
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        top: SIZES.height * 0.1718,
+        height: SIZES.height * 0.4,
+        backgroundColor: COLORS.white,
+        marginLeft: SIZES.padding,
+        marginRight: SIZES.padding,
+        shadowColor: '#000000',
+        shadowOpacity: 0.8,
+        shadowRadius: 4,
+        shadowOffset: {
+            height: 2,
+            width: 2,
+        },
+        borderRadius: 20,
+        flexDirection: 'column',
+    },
+    budgetInfo: {
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        top: SIZES.height * 0.59,
+        height: SIZES.height * 0.335,
+        backgroundColor: COLORS.white,
+        marginLeft: SIZES.padding,
+        marginRight: SIZES.padding,
+        shadowColor: '#000000',
+        shadowOpacity: 0.8,
+        shadowRadius: 4,
+        shadowOffset: {
+            height: 2,
+            width: 2,
+        },
+        borderRadius: 20,
+        flexDirection: 'column',
+        paddingLeft: SIZES.padding,
+        paddingRight: SIZES.padding,
+        paddingTop: SIZES.padding,
     },
 });
 
