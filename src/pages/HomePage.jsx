@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView } from 'react-native';
 import axios from "axios";
 import { Button } from '@rneui/themed';
 import { useState } from "react";
@@ -23,12 +23,7 @@ function renderheader() {
     return (
         <View
             style={
-                {
-                    width: '100%',
-                    height: SIZES.height * 0.22464,
-                    ...styles.shadow,
-                    backgroundColor: COLORS.navyBlue,
-                }
+                styles.headerContainer
             }>
 
             <View style={{
@@ -36,15 +31,10 @@ function renderheader() {
             }}>
                 <TouchableOpacity
                     /* Notification button */
-                    style={{
-                        marginTop: SIZES.padding * 2,
-                        width: '100%',
-                        alighItems: 'flex-end',
-                        paddingHorizontal: 5,
-                    }
+                    style={styles.headerTouchableOpacity
                     }>
                     <View>
-                        <Icon name='bell-outline' size={25} color={COLORS.white} ></Icon>
+                        <Icon name="bell-outline" size={25} color={COLORS.white} />
                     </View>
                 </TouchableOpacity>
                 <View style={{ flexDirection: 'row', marginTop: 20 }}>
@@ -54,7 +44,7 @@ function renderheader() {
                     </View>
                     <View style={{ flex: 2, alignItems: "flex-end", marginRight: SIZES.padding }}>
                         <Button color={COLORS.darkYellow}>
-                            <Icon name='rotate-3d-variant' size={25} color={COLORS.white} ></Icon>
+                            <Icon name="rotate-3d-variant" size={25} color={COLORS.white} />
                             Async
                         </Button>
                     </View>
@@ -105,10 +95,11 @@ function renderSummaryInfo() {
 
 function renderBudgetInfo() {
     return (
-        <View style={styles.budgetInfo}>
+        <ScrollView style={styles.budgetInfo}>
             <MainBudget style={styles.BudgetBar} name="Grocery" max={2000} min={0} value={500} barWidth={SIZES.width * 0.65} />
             <MainBudget style={styles.BudgetBar} name="Gasoline" max={1000} min={0} value={800} barWidth={SIZES.width * 0.65} />
-        </View>
+            <MainBudget style={styles.BudgetBar} name="Travel" max={500} min={0} value={450} barWidth={SIZES.width * 0.65} />
+        </ScrollView>
     );
 }
 
@@ -186,6 +177,26 @@ const styles = StyleSheet.create({
         paddingRight: SIZES.padding,
         paddingTop: SIZES.padding,
     },
+    headerContainer: {
+        width: '100%',
+        height: SIZES.height * 0.22464,
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 3,
+        },
+        shadowOpacity: 0.29,
+        shadowRadius: 4.65,
+        elevation: 7,
+        backgroundColor: COLORS.navyBlue,
+    },
+    headerTouchableOpacity:
+    {
+        marginTop: SIZES.padding * 2,
+        paddingHorizontal: 5,
+        alignSelf: 'flex-start',
+        width: 35,
+    }
 });
 
 export default HomePage;

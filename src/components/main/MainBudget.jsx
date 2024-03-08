@@ -10,9 +10,9 @@ const getBackgroundColor = (percentage) => {
         color = '';
     } else if (value >= 1 && value < 50) {
         color = COLORS.green;
-    } else if (value >= 50 && value < 80) {
+    } else if (value >= 50 && value < 90) {
         color = '#ffb641';
-    } else if (value >= 80) {
+    } else if (value >= 90) {
         color = 'red';
     }
     return color;

@@ -7,11 +7,14 @@
 import React from 'react';
 import Tabs from './src/navigations/Tabs';
 import { NavigationContainer } from '@react-navigation/native';
+import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 function App() {
   // const isDarkMode = useColorScheme() === 'dark';
   // const backgroundStyle = {
   //   backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   // };
+  global.Text = Text;
+  global.View = View;
   return (
     <NavigationContainer>
       <Tabs />
