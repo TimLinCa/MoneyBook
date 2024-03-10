@@ -1,17 +1,9 @@
 import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, ScrollView } from 'react-native';
-import axios from "axios";
-import { Button } from '@rneui/themed';
-import { useState } from "react";
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { COLORS, SIZES, FONTS } from '../../styles';
-import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-import { NavigationContainer } from '@react-navigation/native';
-import MainAsset from '../components/main/MainAsset';
-import MainDebt from '../components/main/MainDebt';
-import MainBudget from "../components/main/MainBudget";
-import { SafeAreaView } from "react-native-safe-area-context";
-import AccountCard from '../components/account/AccountCard';
+import { COLORS, SIZES } from '@styles';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import AccountCard from '@components/account/AccountCard';
 //This page will show the user's account information and allow them to add or remove accounts.
 function renderheader() {
     return (

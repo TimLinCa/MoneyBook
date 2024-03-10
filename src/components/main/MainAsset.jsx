@@ -1,7 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { COLORS, SIZES, FONTS } from '../../../styles';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { COLORS, SIZES, FONTS } from '@styles';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import { SafeAreaView } from 'react-native-safe-area-context';
 function MainAsset() {

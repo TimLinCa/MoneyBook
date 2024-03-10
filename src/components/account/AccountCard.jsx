@@ -3,7 +3,7 @@ import { StyleSheet, Text, View, Image } from 'react-native';
 import { Card } from '@rneui/themed';
 import { Button } from '@rneui/themed';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { COLORS, SIZES, FONTS } from '../../../styles/theme.js';
+import { COLORS, SIZES, FONTS } from '@styles';
 function AccountCard() {
     return (
         <View style={styles.container}>

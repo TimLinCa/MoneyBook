@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import * as Progress from 'react-native-progress';
 import { View, Text, StyleSheet } from 'react-native';
-import { COLORS, SIZES, FONTS } from '../../../styles';
+import { COLORS, SIZES, FONTS } from '@styles';
 
 const getBackgroundColor = (percentage) => {
     let value = percentage * 100;

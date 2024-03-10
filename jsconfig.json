@@ -1,0 +1,28 @@
+{
+    "compilerOptions": {
+        "extensions": [
+            ".js",
+            ".jsx",
+            ".ts",
+            ".tsx"
+        ],
+        "baseUrl": ".",
+        "paths": {
+            "@assets/*": [
+                "./assets/*"
+            ],
+            "@images/*": [
+                "./assets/images/*"
+            ],
+            "@components/*": [
+                "./src/components/*"
+            ],
+            "@styles/*": [
+                "./styles/*"
+            ],
+            "@pages/*": [
+                "./src/pages/*"
+            ],
+        }
+    }
+}
