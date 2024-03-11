@@ -1,12 +1,18 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { COLORS, SIZES, FONTS } from '@styles';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import { SafeAreaView } from 'react-native-safe-area-context';
-function MainDebt() {
-    const { debt, setdebt } = React.useState(0);
-    const { creditCard, setcreditCard } = React.useState(0);
+function MainDebt({ creditCardDebt }) {
+    const [debt, setDebt] = React.useState(0);
+    const [creditCard, setCreditCard] = React.useState(0);
+
+    useEffect(() => {
+        setCreditCard(creditCardDebt);
+        setDebt(creditCardDebt);
+    }, [creditCardDebt]);
+
     return (
         <SafeAreaView style={styles.safeView}>
             <View style={styles.assetView}>
@@ -14,7 +20,7 @@ function MainDebt() {
                     <FontAwesome6 name='file-invoice-dollar' size={30} color={COLORS.black} />
                 </View>
                 <View style={styles.viewEnd}>
-                    <Text style={styles.currentTextH1}>$ {debt}</Text>
+                    <Text style={styles.currentTextH1}>$ {debt.toLocaleString()}</Text>
                 </View>
             </View>
 
@@ -24,7 +30,7 @@ function MainDebt() {
                         <Text style={styles.currencyLabelText}>Credit Card</Text>
                     </View>
                     <View style={styles.currentTextContainer} >
-                        <Text style={styles.currentText}>$ {creditCard}</Text>
+                        <Text style={styles.currentText}>$ {creditCard.toLocaleString()}</Text>
                     </View>
                 </View>
             </View>

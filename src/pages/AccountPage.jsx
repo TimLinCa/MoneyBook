@@ -24,7 +24,7 @@ function renderAccountInfo() {
     return (
 
         <ScrollView style={styles.accountContainer}>
-            <AccountCard />
+            <AccountCard bankName='CIBC' />
         </ScrollView>
     );
 }

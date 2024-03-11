@@ -13,8 +13,6 @@ function App() {
   // const backgroundStyle = {
   //   backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   // };
-  global.Text = Text;
-  global.View = View;
   return (
     <NavigationContainer>
       <Tabs />

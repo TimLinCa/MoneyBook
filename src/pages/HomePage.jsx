@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, ScrollView } from 'react-native';
 import axios from 'axios';
 import { Button } from '@rneui/themed';
@@ -19,7 +19,8 @@ axios.defaults.baseURL = `http://${address}:8080`;
 
 const Tab = createMaterialTopTabNavigator();
 
-function renderheader() {
+function renderHeader() {
+
     return (
         <View
             style={
@@ -54,7 +55,7 @@ function renderheader() {
     );
 }
 
-function renderSummaryInfo() {
+function renderSummaryInfo(netAsset) {
     return (
         <TouchableOpacity style={styles.summaryInfo}>
             <View>
@@ -67,7 +68,7 @@ function renderSummaryInfo() {
                     </View>
                 </View>
                 <View style={{ alignItems: 'flex-start', height: SIZES.height * 0.0562 }}>
-                    <Text style={{ color: COLORS.green, fontWeight: 700, fontSize: SIZES.h1, marginLeft: SIZES.padding * 1.5 }}>$ {SIZES.height}</Text>
+                    <Text style={{ color: COLORS.green, fontWeight: 700, fontSize: SIZES.h1, marginLeft: SIZES.padding * 1.5 }}>$ {netAsset.toLocaleString()}</Text>
                 </View>
             </View>
             <View style={{ backgroundColor: COLORS.white, flex: 1, borderRadius: 20, paddingBottom: SIZES.padding, paddingLeft: SIZES.padding, paddingRight: SIZES.padding }} >
@@ -83,8 +84,8 @@ function renderSummaryInfo() {
                             tabBarContentContainerStyle: { alignItems: 'center', alignSelf: 'center' }
                         }}
                     >
-                        <Tab.Screen name="Asset" component={MainAsset} />
-                        <Tab.Screen name="DEBT" component={MainDebt} />
+                        <Tab.Screen name="Asset" children={() => <MainAsset cadBalance={10000.12} usdBalance={5000} othersBalance={0} />} />
+                        <Tab.Screen name="DEBT" children={() => <MainDebt creditCardDebt={10000} />} />
                     </Tab.Navigator>
                 </NavigationContainer>
             </View>
@@ -106,7 +107,11 @@ function renderBudgetInfo() {
 
 function HomePage() {
     const [linkToken, setLinkToken] = useState(null);
+    const [netAsset, setNetAsset] = useState(0);
 
+    useEffect(() => {
+        setNetAsset(5000.12);
+    }, []);
     // useEffect(() => {
     //     async function fetchLinkToken() {
     //         const res = await axios.post(`/api/create_link_token`);
@@ -118,8 +123,8 @@ function HomePage() {
 
     return (
         <SafeAreaView style={{ flex: 1, paddingBottom: 10 }}>
-            {renderheader()}
-            {renderSummaryInfo()}
+            {renderHeader()}
+            {renderSummaryInfo(netAsset)}
             {renderBudgetInfo()}
         </SafeAreaView>
     );
