@@ -257,4 +257,15 @@ function getTransactionTableName(institutionName) {
   return transactionInfo_base + institutionName;
 }
 
-export default { AddInstitutionToken, GetInstitutionToken, GetInstitutionNameList, AsyncInstitutionAccountInfo, GetLocalInstitutionAccountInfo, UpdateTransactionInfo, Test };
+export default {
+  AddInstitutionToken,
+  GetInstitutionToken,
+  GetInstitutionNameList,
+  AsyncInstitutionAccountInfo,
+  GetLocalInstitutionAccountInfo,
+  UpdateTransactionInfo,
+  Test,
+  AddBudgetItem,
+  EditBudgetItem,
+  getBudgetInfo,
+};
