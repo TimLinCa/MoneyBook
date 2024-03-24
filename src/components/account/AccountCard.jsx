@@ -7,8 +7,7 @@ import AccountBar from './AccountBar';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import CIBCIcon from '@images/CIBCLogo.png';
-function AccountCard({ bankName }) {
-
+function AccountCard({ bankName, accountInfo }) {
     const [iconImgName, setIconImgName] = React.useState(CIBCIcon);
     const [name, setName] = React.useState('BankName');
     useEffect(() => {
@@ -32,8 +31,13 @@ function AccountCard({ bankName }) {
                 </View>
             </View>
             <View style={styles.cardBar} />
-            <AccountBar accountType='bank' accountName='Chequing(123***888)' accountBalance={20000} />
-            <AccountBar accountType='credit' accountName='Credit Card(123***888)' accountBalance={-5000} />
+            {
+                accountInfo != null ? accountInfo.map((account, index) => {
+                    return (
+                        <AccountBar key={index} accountType={account.type} accountName={account.name + '(' + account.accountMask + ')'} accountBalance={account.balance} />
+                    );
+                }) : <View></View>
+            }
         </View>
 
     );
@@ -76,6 +80,7 @@ const styles = StyleSheet.create({
             width: 2,
         },
         borderRadius: 20,
+        marginBottom: SIZES.padding,
     },
     bankName: {
         fontSize: SIZES.h2,
