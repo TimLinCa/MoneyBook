@@ -1,11 +1,5 @@
 {
     "compilerOptions": {
-        "extensions": [
-            ".js",
-            ".jsx",
-            ".ts",
-            ".tsx"
-        ],
         "baseUrl": ".",
         "paths": {
             "@assets/*": [
