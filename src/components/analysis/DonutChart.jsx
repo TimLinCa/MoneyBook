@@ -1,8 +1,8 @@
 import React from 'react';
-import {VictoryPie, VictoryLegend} from 'victory-native';
+// import {VictoryPie, VictoryLegend} from 'victory-native';
 import {COLORS, SIZES, FONTS} from '../../../styles';
 import {ScrollView, StyleSheet, View, Text, Dimensions} from 'react-native';
-
+// receive data
 function DonutChart() {
   const data = [
     {x: 'Grocery', y: 500, color: '#FF5733'},
@@ -19,15 +19,15 @@ function DonutChart() {
     <View style={{flex: 1}}>
       <Text style={styles.componentTitle}>Expenses</Text>
       <View style={styles.box}>
-        <VictoryLegend
+        {/* <VictoryLegend
           x={-5} // Set x position to 20 for left alignment
           y={0} // Set y position to 20 for top alignment
           orientation="vertical"
           data={data.map(item => ({name: item.x, symbol: {fill: item.color}}))}
           style={{labels: {fontSize: 12}}} // Set custom style for labels (fontSize: 10)
-        />
+        /> */}
         <View style={{marginTop: -300}}>
-          <VictoryPie
+          {/* <VictoryPie
             data={data}
             width={430} // Adjust width
             height={300} // Adjust height
@@ -35,7 +35,7 @@ function DonutChart() {
             colorScale={data.map(item => item.color)} // Custom color scale
             padAngle={2} // Adjust spacing between segments
             label={() => total} // Render total as label in the center
-          />
+          /> */}
           <Text
             style={{
               position: 'absolute',
