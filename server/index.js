@@ -40,6 +40,7 @@ app.post('/api/create_link_token', async (req, res, next) => {
         client_name: 'MoneyBook',
         language: 'en',
         products: ['auth'],
+        required_if_supported_products: ['transactions'],
         country_codes: ['CA'],
         android_package_name: process.env.PLAID_ANDROID_PACKAGE_NAME,
     };
@@ -126,14 +127,7 @@ app.post('/asyncTransactions', async function (req, res) {
     );
 });
 
-app.post('/get_transactions', async function (req, res) {
-    const PlaidResponse = await client.transactionsGet({
-        access_token: req.body.access_token,
-        start_date: req.body.start_date,
-        end_date: req.body.end_date,
-    });
-    res.json(PlaidResponse.data);
-});
+
 
 app.listen(port, () => {
     console.log(`Backend server is running on port ${port}...`);

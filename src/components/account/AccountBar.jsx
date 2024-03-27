@@ -1,16 +1,25 @@
 import React, { useEffect } from 'react';
-import { StyleSheet, Text, View, Image } from 'react-native';
+import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
 import { COLORS, SIZES, FONTS } from '@styles';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-function AccountBar({ accountType, accountName, accountBalance }) {
+
+
+function AccountBar({ navigation, id, accountType, accountName, accountBalance, bankName }) {
     const [iconName, setIconName] = React.useState('bank');
     const [balance, setBalance] = React.useState(0);
+    const barOnPress = () => {
+        navigation.navigate('AccountInfo', { institutionName: { bankName }, accountInfoName: { accountName }, accountBalance: { accountBalance }, accountId: { id } });
+
+    };
     useEffect(() => {
-        if (accountType === 'bank') {
+        if (accountType === 'depository') {
             setIconName('bank');
         }
         else if (accountType === 'credit') {
             setIconName('credit-card-outline');
+        }
+        else if (accountType === 'loan') {
+            setIconName('invoice-text-clock');
         }
         else if (accountType === 'wallet') {
             setIconName('wallet');
@@ -22,11 +31,11 @@ function AccountBar({ accountType, accountName, accountBalance }) {
     }, [accountBalance]);
 
     return (
-        <View style={styles.container}>
+        <TouchableOpacity onPress={barOnPress} style={styles.container}>
             <Icon style={styles.icon} size={25} name={iconName} />
             <Text style={styles.BarText}>{accountName}</Text>
-            <Text style={styles.balanceText}>$ {balance}</Text>
-        </View>
+            <Text style={styles.balanceText}>$ {balance.toLocaleString()}</Text>
+        </TouchableOpacity>
     );
 
 }
@@ -38,13 +47,7 @@ const styles = StyleSheet.create({
     container:
     {
         backgroundColor: COLORS.white,
-        shadowColor: '#000000',
-        shadowOpacity: 0.8,
-        shadowRadius: 4,
-        shadowOffset: {
-            height: 2,
-            width: 2,
-        },
+
         borderRadius: 10,
         flexDirection: 'row',
         padding: SIZES.padding,
@@ -74,5 +77,5 @@ const styles = StyleSheet.create({
         position: 'absolute',
         right: 0,
         marginRight: SIZES.padding,
-    }
+    },
 });

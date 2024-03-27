@@ -54,6 +54,7 @@ const budgetInfo = 'budgetInfo';
 const transactionInfo_base = 'transactionInfo_';
 
 export const Test = () => {
+
   const namelist = GetInstitutionNameList();
   console.log(namelist);
   namelist.forEach((name) => {
@@ -71,7 +72,7 @@ export const AddInstitutionToken = (institutionName, token) => {
     tokenList = [];
   }
 
-  if (tokenList.indexOf(tokenItem => tokenItem.institutionName === institutionName) > -1) {
+  if (tokenList.map(tokenItem => tokenItem.institutionName).indexOf(institutionName) > -1) {
     tokenList.find((tokenItem) =>
       tokenItem.institutionName === institutionName).token = token;
   }
@@ -81,6 +82,18 @@ export const AddInstitutionToken = (institutionName, token) => {
   }
 
   storage.set(InstitutionTokenTokenKey, JSON.stringify(tokenList));
+};
+
+
+export const GetInstitutionIconUrl = (institutionName) => {
+
+  if (storage.contains(InstitutionTokenTokenKey)) {
+    const tokenList = JSON.parse(storage.getString(InstitutionTokenTokenKey));
+    return tokenList.find((tokenItem) => tokenItem.institutionName === institutionName).logoUrl;
+  }
+  else {
+    return null;
+  }
 };
 
 export const GetInstitutionToken = (institutionName) => {
@@ -175,12 +188,13 @@ export const UpdateTransactionInfo = (institutionName, added, modified, removed,
 export const GetTransactionCusror = (institutionName) => {
   const cursorKey = transactionInfo_base + institutionName + '_cursor';
   return storage.getString(cursorKey);
-}
+};
 
 export const GetTransactionHistoryByAccountId = (institutionName, accountId) => {
   const tableName = getTransactionTableName(institutionName);
   let transactionInfoList = JSON.parse(storage.getString(tableName));
   let transactionHistory = transactionInfoList.filter((transaction) => transaction.accountId === accountId);
+  transactionHistory.sort((a, b) => b.date.localeCompare(a.date));
   return transactionHistory;
 };
 
@@ -188,6 +202,7 @@ export const GetTransactionHistoryByMonth = (institutionName, year, month) => {
   const tableName = getTransactionTableName(institutionName);
   let transactionInfoList = JSON.parse(storage.getString(tableName));
   let transactionHistory = transactionInfoList.filter((transaction) => transaction.date.includes(year + '-' + month));
+
   return transactionHistory;
 };
 
@@ -232,7 +247,7 @@ export const EditBudgetItem = (budgetName, budget, amount) => {
   if (storage.contains(budgetInfo)) {
     budgetList = JSON.parse(storage.getString(budgetInfo));
 
-    let index = budgetList.findIndex((budgetItem) => budgetItem.name === budgetName);
+    let index = budgetList.map(budgetItem => budgetItem.name).indexOf(budgetName);
     if (index > -1) {
       budgetList[index].budget = budget;
       budgetList[index].amount = amount;
@@ -249,6 +264,7 @@ export const getBudgetInfo = () => {
   return budgetList;
 };
 
+
 function getAccountTableName(institutionName) {
   return accountInfo_base + institutionName;
 }
@@ -256,6 +272,8 @@ function getAccountTableName(institutionName) {
 function getTransactionTableName(institutionName) {
   return transactionInfo_base + institutionName;
 }
+
+
 
 export default {
   AddInstitutionToken,

@@ -22,7 +22,14 @@ const getBackgroundColor = (percentage) => {
 function MainBudget({ name, max, min, value, barWidth }) {
     const [percentage, SetPercentage] = React.useState(0);
     useEffect(() => {
-        let percentageValue = ((value - min) / (max - min));
+        let percentageValue = 0;
+        if (value <= max) {
+            percentageValue = ((value - min) / (max - min));
+        }
+        else {
+            percentageValue = 1;
+        }
+
         SetPercentage(percentageValue);
     }, [value, max, min]);
 

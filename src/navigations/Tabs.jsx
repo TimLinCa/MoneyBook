@@ -1,11 +1,11 @@
 import React from 'react'; // Import the 'React' module
-
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import SettingPage from '@pages/SettingPage';
 import Analysis from '@pages/Analysis';
 import AccountPage from '@pages/AccountPage';
 import HomePage from '@pages/HomePage';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import AccountNav from './AccountNav';
 import { COLORS } from '@styles';
 
 
@@ -40,7 +40,7 @@ function Tabs() {
             })}
         >
             <Tab.Screen name="Summary" component={HomePage} />
-            <Tab.Screen name="Account" component={AccountPage} />
+            <Tab.Screen name="Account" component={AccountNav} />
             <Tab.Screen name="Analysis" component={Analysis} />
             <Tab.Screen name="Settings" component={SettingPage} />
         </Tab.Navigator>
