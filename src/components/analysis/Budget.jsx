@@ -12,20 +12,12 @@ import {
 import AddIcon from 'react-native-vector-icons/Feather';
 import PencilIcon from 'react-native-vector-icons/EvilIcons';
 import TrashIcon from 'react-native-vector-icons/EvilIcons';
+import RNPickerSelect from 'react-native-picker-select';
+import {AddBudgetItem} from '../../store/mmkv';
+import {EditBudgetItem} from '../../store/mmkv';
 
 function Budget() {
-  const [budget, setBudget] = React.useState([
-    {key: 'Gym', value: 50},
-    {key: 'Food', value: 100},
-    {key: 'House', value: 200},
-    {key: 'Food and Grocery', value: 400},
-    {key: 'Hosing or Rent', value: 1000},
-    {key: 'Bills', value: 200},
-    {key: 'Insurance', value: 250},
-    {key: 'Transportation', value: 200},
-    {key: 'Entertainment', value: 100},
-    {key: 'Personal Spending', value: 100},
-  ]);
+  const [budget, setBudget] = React.useState([]);
 
   const [total, setTotal] = React.useState(0);
 
@@ -45,18 +37,16 @@ function Budget() {
     key: '',
     value: null,
   });
-  const [selectedIcon, setSelectedIcon] = React.useState('');
 
   const handleAddIconPress = () => {
     setAddModalVisible(true);
-    setSelectedIcon('add');
   };
 
   const handlePencilIconPress = clickedItem => {
-    setSelectedItem(clickedItem); // Set the clicked item as selectedItem
-
+    // Set both selectedItem and newBudgetItem to the clicked item's values
+    setSelectedItem(clickedItem);
+    setNewBudgetItem(clickedItem);
     setEditModalVisible(true);
-    setSelectedIcon('pencil');
   };
 
   const handleTrashIconPress = clickedItem => {
@@ -66,17 +56,14 @@ function Budget() {
     );
     setBudget(updatedBudget);
   };
-  const handleCloseModal = () => {
-    setAddModalVisible(false);
-    setEditModalVisible(false);
-    setSelectedIcon('');
-  };
+
   const handleSaveNewBudgetItem = () => {
     // Validate if both key and value are provided
     if (!newBudgetItem.key || newBudgetItem.value === null) {
       // You can display an error message here
       return;
     }
+    AddBudgetItem(newBudgetItem.key, newBudgetItem.value);
 
     // Update the budget state with the new item
     setBudget(prevBudget => [
@@ -97,6 +84,7 @@ function Budget() {
       // You can display an error message here
       return;
     }
+    EditBudgetItem(selectedItem.key, newBudgetItem.key, newBudgetItem.value);
 
     setBudget(prevBudget => {
       return prevBudget.map(item => {
@@ -121,47 +109,10 @@ function Budget() {
           style={styles.iconContainer}>
           <AddIcon name="plus-circle" size={30} color="#000" />
         </TouchableOpacity>
-        {/* <TouchableOpacity
-          onPress={handlePencilIconPress}
-          style={styles.iconContainer}>
-          <PencilIcon name="pencil" size={30} color="#000" />
-        </TouchableOpacity> */}
-
-        {/* old */}
-        {/* <Modal
-          animationType="fade"
-          transparent={true}
-          visible={addModalVisible}
-          onRequestClose={() => setAddModalVisible(false)}>
-          <View style={styles.modalView}>
-            <TextInput
-              placeholder="Enter budget item name"
-              value={newBudgetItem.key}
-              onChangeText={text =>
-                setNewBudgetItem({...newBudgetItem, key: text})
-              }
-            />
-            <TextInput
-              placeholder="Enter budget item value"
-              keyboardType="numeric"
-              value={newBudgetItem.value ? newBudgetItem.value.toString() : ''}
-              onChangeText={text => {
-                const numValue = text !== '' ? parseFloat(text) : null;
-                setNewBudgetItem({...newBudgetItem, value: numValue});
-              }}
-            />
-            <TouchableOpacity onPress={handleSaveNewBudgetItem}>
-              <Text>Save</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => setAddModalVisible(false)}>
-              <Text>Cancel</Text>
-            </TouchableOpacity>
-          </View>
-        </Modal> */}
 
         {/* add new item */}
         <Modal
-          animationType="fade" // You can change animationType to achieve different effects
+          animationType="fade"
           transparent={true}
           visible={addModalVisible}
           onRequestClose={() => setAddModalVisible(false)}>
@@ -174,13 +125,33 @@ function Budget() {
 
             {/* Modal content */}
             <View style={styles.modalView}>
-              <TextInput
-                placeholder="Enter budget item name"
-                value={newBudgetItem.key}
-                onChangeText={text =>
-                  setNewBudgetItem({...newBudgetItem, key: text})
+              {/* Replace TextInput for budget item name with RNPickerSelect */}
+              <RNPickerSelect
+                placeholder={{label: 'Select budget item', value: null}}
+                onValueChange={value =>
+                  setNewBudgetItem({...newBudgetItem, key: value})
                 }
+                items={[
+                  {label: 'BANK_FEES', value: 'BANK_FEES'},
+                  {label: 'ENTERTAINMENT', value: 'ENTERTAINMENT'},
+                  {label: 'FOOD_AND_DRINK', value: 'FOOD_AND_DRINK'},
+                  {label: 'GENERAL_MERCHANDISE', value: 'GENERAL_MERCHANDISE'},
+                  {label: 'GENERAL_SERVICES', value: 'GENERAL_SERVICES'},
+                  {
+                    label: 'GOVERNMENT_AND_NON_PROFIT',
+                    value: 'GOVERNMENT_AND_NON_PROFIT',
+                  },
+                  {label: 'HOME_IMPROVEMENT', value: 'HOME_IMPROVEMENT'},
+                  {label: 'LOAN_PAYMENTS', value: 'LOAN_PAYMENTS'},
+                  {label: 'MEDICAL', value: 'MEDICAL'},
+                  {label: 'PERSONAL_CARE', value: 'PERSONAL_CARE'},
+                  {label: 'RENT_AND_UTILITIES', value: 'RENT_AND_UTILITIES'},
+
+                  {label: 'TRANSPORTATION', value: 'TRANSPORTATION'},
+                  {label: 'TRAVEL', value: 'TRAVEL'},
+                ]}
               />
+              {/* Use TextInput for entering budget item value */}
               <TextInput
                 placeholder="Enter budget item value"
                 keyboardType="numeric"
@@ -217,15 +188,22 @@ function Budget() {
 
             {/* Edit modal content */}
             <View style={styles.modalView}>
-              <TextInput
-                placeholder="Enter new budget item name"
-                // value={selectedItem.key}
-                onChangeText={text => setNewBudgetItem({key: text})}
+              {/* Use RNPickerSelect for selecting budget item name */}
+              <RNPickerSelect
+                placeholder={{
+                  label: selectedItem.key,
+                  value: selectedItem.key,
+                }}
+                disabled={true} // Make RNPickerSelect unclickable
+                items={budget.map(item => ({label: item.key, value: item.key}))}
               />
+              {/* Use TextInput for entering budget item value */}
               <TextInput
                 placeholder="Enter new budget item value"
                 keyboardType="numeric"
-                // value={selectedItem.value ? selectedItem.value.toString() : ''}
+                value={
+                  newBudgetItem.value ? newBudgetItem.value.toString() : ''
+                }
                 onChangeText={text => {
                   const numValue = text !== '' ? parseFloat(text) : null;
                   setNewBudgetItem({...newBudgetItem, value: numValue});

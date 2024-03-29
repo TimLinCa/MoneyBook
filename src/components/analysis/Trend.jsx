@@ -27,41 +27,40 @@ function Trend() {
     <View>
       {/* <Chart /> */}
       <Text style={styles.componentTitle}>Trend</Text>
-
-      <NavigationContainer independent={true}>
-        <Tab.Navigator
-          screenOptions={{
-            tabBarInactiveTintColor: 'gray',
-            tabBarActiveTintColor: 'black',
-            tabBarIndicatorStyle: {
-              borderRadius: 20,
-              backgroundColor: 'white',
-              height: '100%',
-              alignSelf: 'center',
-              alignContent: 'center',
-            },
-            tabBarIndicatorContainerStyle: {width: '100%'},
-            tabBarLabelStyle: {fontSize: SIZES.body5, fontWeight: 'bold'},
-            tabBarStyle: {
-              backgroundColor: COLORS.lightGray,
-              borderRadius: 20,
-              margin: SIZES.padding,
-              width: '99.9%',
-              height: '10%',
-              alignSelf: 'center',
-            },
-            tabBarContentContainerStyle: {
-              alignItems: 'center',
-              alignSelf: 'center',
-            },
-          }}>
-          <Tab.Screen name="Income" component={Chart} />
-          <Tab.Screen name="Expense" component={Chart} />
-          <Tab.Screen name="Balance" component={Chart} />
-        </Tab.Navigator>
-      </NavigationContainer>
-
-      <Text style={styles.componentTitle}>Trend</Text>
+      <View style={styles.box}>
+        <NavigationContainer independent={true}>
+          <Tab.Navigator
+            screenOptions={{
+              tabBarInactiveTintColor: 'gray',
+              tabBarActiveTintColor: 'black',
+              tabBarIndicatorStyle: {
+                borderRadius: 20,
+                backgroundColor: 'white',
+                height: '100%',
+                alignSelf: 'center',
+                alignContent: 'center',
+              },
+              tabBarIndicatorContainerStyle: {width: '100%'},
+              tabBarLabelStyle: {fontSize: SIZES.body5, fontWeight: 'bold'},
+              tabBarStyle: {
+                backgroundColor: COLORS.lightGray,
+                borderRadius: 20,
+                margin: SIZES.padding,
+                width: '99.9%',
+                height: '10%',
+                alignSelf: 'center',
+              },
+              tabBarContentContainerStyle: {
+                alignItems: 'center',
+                alignSelf: 'center',
+              },
+            }}>
+            <Tab.Screen name="Income" component={Chart} />
+            <Tab.Screen name="Expense" component={Chart} />
+            <Tab.Screen name="Balance" component={Chart} />
+          </Tab.Navigator>
+        </NavigationContainer>
+      </View>
     </View>
   );
 }
@@ -96,7 +95,8 @@ const styles = StyleSheet.create({
     marginLeft: SIZES.padding,
   },
   box: {
-    backgroundColor: '#b8b6b6',
+    backgroundColor: '#ffffff',
+    height: 300,
     marginLeft: SIZES.padding,
     marginRight: SIZES.padding,
     padding: 10,

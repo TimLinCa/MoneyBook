@@ -16,17 +16,6 @@ import {
   TouchableOpacity,
 } from 'react-native';
 
-// const chartConfig = {
-//   backgroundGradientFrom: '#ffffff',
-//   backgroundGradientTo: '#ffffff',
-
-//   decimalPlaces: 2,
-//   color: (opacity = 1) => `rgba(5, 187, 232, ${opacity})`,
-//   labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-//   style: {borderRadius: 16, marginHorizontal: 20, marginVertical: 10},
-//   propsForDots: {r: '6', strokeWidth: '2', stroke: '#ffa726'},
-//   //barColors: '#000080',
-// };
 const mockData = {
   labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
   datasets: [
@@ -56,6 +45,7 @@ function Chart() {
         chartConfig={chartConfig}
       />
     </View>
+
     // <ScrollView contentContainerStyle={styles.scrollView}>
     //   <View style={styles.container}>
     //     <BarChart
