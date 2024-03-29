@@ -5,16 +5,44 @@ import { Card } from '@rneui/themed';
 import { Button } from '@rneui/themed';
 import AccountBar from './AccountBar';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-
+import { GetInstitutionIconUrl } from '@store/mmkv';
 import CIBCIcon from '@images/CIBCLogo.png';
-function AccountCard({ bankName, accountInfo }) {
-    const [iconImgName, setIconImgName] = React.useState(CIBCIcon);
+import ScotiaIcon from '@images/Scotiabank-logo.png';
+import RBCIcon from '@images/RBC-logo.png';
+import TDIcon from '@images/TD-logo.png';
+import BMOIcon from '@images/BMO-logo.png';
+import NBCIcon from '@images/NBC-logo.png';
+function getIconSource(bankName) {
+    let iconSource = '';
+    switch (bankName) {
+        case 'CIBC':
+            iconSource = CIBCIcon;
+            break;
+        case 'Scotiabank':
+            iconSource = ScotiaIcon;
+            break;
+        case 'RBC Loyal Bank':
+            iconSource = RBCIcon;
+            break;
+        case 'TD Canada Trust':
+            iconSource = TDIcon;
+            break;
+        case 'BMO Bank of Montreal':
+            iconSource = BMOIcon;
+            break;
+        case 'National Bank of Canada':
+            iconSource = NBCIcon;
+            break;
+    }
+    return iconSource;
+}
+
+function AccountCard({ navigation, bankName, accountInfo }) {
+    const [iconImgName, setIconImgName] = React.useState('');
     const [name, setName] = React.useState('BankName');
     useEffect(() => {
         setName(bankName);
-        if (bankName === 'CIBC') {
-            setIconImgName(CIBCIcon);
-        }
+        setIconImgName(getIconSource(bankName));
     }, [bankName]);
 
 
@@ -34,9 +62,9 @@ function AccountCard({ bankName, accountInfo }) {
             {
                 accountInfo != null ? accountInfo.map((account, index) => {
                     return (
-                        <AccountBar key={index} accountType={account.type} accountName={account.name + '(' + account.accountMask + ')'} accountBalance={account.balance} />
+                        <AccountBar key={account.id} navigation={navigation} id={account.id} bankName={bankName} accountType={account.type} accountName={account.name + '(' + account.accountMask + ')'} accountBalance={account.balance} />
                     );
-                }) : <View></View>
+                }) : <View />
             }
         </View>
 
