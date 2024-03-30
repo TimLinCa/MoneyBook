@@ -48,7 +48,7 @@ function MainBudget({ name, max, min, value, barWidth }) {
 const styles = StyleSheet.create({
     barLabel: {
         color: COLORS.black,
-        fontSize: SIZES.h3,
+        fontSize: SIZES.h4,
         alignSelf: 'center',
         marginRight: 10,
         width: SIZES.width * 0.2,

@@ -4,14 +4,16 @@ import { COLORS, SIZES, FONTS } from '@styles';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import { SafeAreaView } from 'react-native-safe-area-context';
-function MainDebt({ creditCardDebt }) {
+function MainDebt({ creditCardDebt, loanDebt }) {
     const [debt, setDebt] = React.useState(0);
     const [creditCard, setCreditCard] = React.useState(0);
+    const [loan, setLoan] = React.useState(0);
 
     useEffect(() => {
         setCreditCard(creditCardDebt);
         setDebt(creditCardDebt);
-    }, [creditCardDebt]);
+        setLoan(loanDebt);
+    }, [creditCardDebt, loanDebt]);
 
     return (
         <SafeAreaView style={styles.safeView}>
@@ -31,6 +33,15 @@ function MainDebt({ creditCardDebt }) {
                     </View>
                     <View style={styles.currentTextContainer} >
                         <Text style={styles.currentText}>$ {creditCard.toLocaleString()}</Text>
+                    </View>
+                </View>
+
+                <View style={styles.summaryView}>
+                    <View style={styles.currencyLabelTextContainer}>
+                        <Text style={styles.currencyLabelText}>Loan</Text>
+                    </View>
+                    <View style={styles.currentTextContainer} >
+                        <Text style={styles.currentText}>$ {loan.toLocaleString()}</Text>
                     </View>
                 </View>
             </View>
@@ -53,11 +64,12 @@ const styles = StyleSheet.create({
     },
     viewStart: {
         flex: 1,
-        alignItems: 'flex-start'
+        alignItems: 'flex-start',
+        alignSelf: 'center',
     },
     viewEnd: {
         flex: 2,
-        alignItems: 'flex-end'
+        alignItems: 'flex-end',
     },
     summaryView: {
         flexDirection: 'row',

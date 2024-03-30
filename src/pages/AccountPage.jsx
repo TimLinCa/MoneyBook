@@ -4,12 +4,14 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { COLORS, SIZES } from '@styles';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState, useEffect } from 'react';
-import { AddInstitutionToken, AsyncInstitutionAccountInfo, GetInstitutionNameList, GetLocalInstitutionAccountInfo, Test, UpdateTransactionInfo } from '../store/mmkv';
+import { UpdateAccountBalance, GetTransactionCursor, GetInstitutionToken, AddInstitutionToken, AsyncInstitutionAccountInfo, GetInstitutionNameList, GetLocalInstitutionAccountInfo, Test, UpdateTransactionInfo } from '../store/mmkv';
 import AccountCard from '@components/account/AccountCard';
-import axios from 'axios';
+
 import { PlaidLink, LinkExit, LinkSuccess } from 'react-native-plaid-link-sdk';
 import { Button } from '@rneui/base';
 import { NavigationContainer } from '@react-navigation/native';
+import { AddBudgetItem, getBudgetInfo } from '@store/mmkv';
+import axios from 'axios';
 const address = '10.0.0.153';
 axios.defaults.baseURL = `http://${address}:3005`;
 //This page will show the user's account information and allow them to add or remove accounts.
@@ -24,10 +26,28 @@ function AccountPage({ navigation }) {
         setLinkToken(res.data.link_token);
     }
 
-    useEffect(() => {
-        fetchLinkToken();
+    const asyncAccount = async (institutionName) => {
+        const accToken = GetInstitutionToken(institutionName);
+        const authRes = await axios.post('/async_balance', { access_token: accToken });
+        UpdateAccountBalance(institutionName, authRes);
+        let hasMore = true;
+        let cursor = GetTransactionCursor(institutionName);
+        while (hasMore) {
+            let asyncTransaction = await axios.post('/asyncTransactions', { access_token: accToken, cursor: cursor });
+            UpdateTransactionInfo(institutionName, asyncTransaction.data.added, asyncTransaction.data.modified, asyncTransaction.data.removed, asyncTransaction.data.cursor);
+            cursor = asyncTransaction.data.cursor;
+            hasMore = asyncTransaction.data.has_more;
+        }
         setInstitutionNameList(GetInstitutionNameList());
-    }, []);
+    };
+
+    useEffect(() => {
+        const unsubscribe = navigation.addListener('focus', () => {
+            fetchLinkToken();
+            setInstitutionNameList(GetInstitutionNameList());
+        });
+        return unsubscribe;
+    }, [navigation]);
 
     useEffect(() => {
         async function renderAccountInfo() {
@@ -42,7 +62,6 @@ function AccountPage({ navigation }) {
                 accountInfoList.push(accountInfo);
             }
             setAccountInfos(accountInfoList);
-
         }
 
         renderAccountInfo();
@@ -51,7 +70,7 @@ function AccountPage({ navigation }) {
     return (
         <SafeAreaView>
             {RenderHeader(linkToken, setInstitutionNameList)}
-            {RenderAccountInfo(navigation, accountInfos)}
+            {RenderAccountInfo(navigation, accountInfos, asyncAccount)}
         </SafeAreaView>
     );
 }
@@ -62,6 +81,9 @@ function RenderHeader(linkToken, setInstitutionNameList) {
     const TestButtonFunction = async () => {
         Test();
         setInstitutionNameList(GetInstitutionNameList());
+        //AddBudgetItem('FOOD_AND_DRINK', 3000);
+        // console.log(getBudgetInfo(new Date().getFullYear(), new Date().getMonth() + 1));
+
     };
     return (
         <View
@@ -88,8 +110,8 @@ function RenderHeader(linkToken, setInstitutionNameList) {
                             let cursor = null;
                             while (hasMore) {
                                 let asyncTransaction = await axios.post('/asyncTransactions', { access_token: accessTokenRes.data.access_token, cursor: cursor });
-                                UpdateTransactionInfo(institutionName, asyncTransaction.data.added, asyncTransaction.data.modified, asyncTransaction.data.removed, asyncTransaction.data.next_cursor);
-                                cursor = asyncTransaction.data.next_cursor;
+                                UpdateTransactionInfo(institutionName, asyncTransaction.data.added, asyncTransaction.data.modified, asyncTransaction.data.removed, asyncTransaction.data.cursor);
+                                cursor = asyncTransaction.data.cursor;
                                 hasMore = asyncTransaction.data.has_more;
                             }
                             setInstitutionNameList(GetInstitutionNameList());
@@ -111,12 +133,13 @@ function RenderHeader(linkToken, setInstitutionNameList) {
     );
 }
 
-function RenderAccountInfo(navigation, accountInfos) {
+function RenderAccountInfo(navigation, accountInfos, asyncAccountMethod) {
+
     return (
         <ScrollView style={styles.accountContainer}>
             {accountInfos.map((accountInfo, index) => {
                 return (
-                    <AccountCard key={index} navigation={navigation} bankName={accountInfo.institutionName} accountInfo={accountInfo.institutionInfo} />
+                    <AccountCard key={index} navigation={navigation} bankName={accountInfo.institutionName} accountInfo={accountInfo.institutionInfo} asyncAccountMethod={asyncAccountMethod} />
                 );
             })}
         </ScrollView>

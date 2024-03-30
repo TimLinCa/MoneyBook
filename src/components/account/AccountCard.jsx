@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { StyleSheet, Text, View, Image } from 'react-native';
+import { StyleSheet, Text, View, Image, ActivityIndicator } from 'react-native';
 import { COLORS, SIZES, FONTS } from '@styles';
 import { Card } from '@rneui/themed';
 import { Button } from '@rneui/themed';
@@ -21,7 +21,7 @@ function getIconSource(bankName) {
         case 'Scotiabank':
             iconSource = ScotiaIcon;
             break;
-        case 'RBC Loyal Bank':
+        case 'RBC Royal Bank':
             iconSource = RBCIcon;
             break;
         case 'TD Canada Trust':
@@ -37,23 +37,31 @@ function getIconSource(bankName) {
     return iconSource;
 }
 
-function AccountCard({ navigation, bankName, accountInfo }) {
+function AccountCard({ navigation, bankName, accountInfo, asyncAccountMethod }) {
     const [iconImgName, setIconImgName] = React.useState('');
     const [name, setName] = React.useState('BankName');
+    const [isAsync, setIsAsync] = React.useState(false);
     useEffect(() => {
         setName(bankName);
         setIconImgName(getIconSource(bankName));
     }, [bankName]);
 
+    const asyncButtonMethod = async () => {
+        setIsAsync(true);
+        await asyncAccountMethod(bankName);
+        setIsAsync(false);
+    };
 
     return (
         <View style={styles.container}>
             <View style={styles.cardTitle}>
-                <Image source={iconImgName} style={styles.Logo} />
+                {iconImgName !== '' ? <Image source={iconImgName} style={styles.Logo} /> : <View />}
                 <Text style={styles.bankName}>{name}</Text>
                 <View style={styles.asyncButton}>
-                    <Button buttonStyle={{ flexDirection: 'row', borderRadius: 15 }} color={COLORS.darkYellow}>
-                        <Icon style={styles.buttonIcon} name="rotate-3d-variant" size={20} color={COLORS.white} />
+                    <Button onPress={() => asyncButtonMethod()} buttonStyle={{ flexDirection: 'row', borderRadius: 15 }} color={COLORS.darkYellow}>
+                        {
+                            isAsync ? <ActivityIndicator color={COLORS.white} style={styles.buttonIcon} animating={isAsync} /> : <Icon style={styles.buttonIcon} name="rotate-3d-variant" size={20} color={COLORS.white} />
+                        }
                         <Text style={styles.buttonText}>Async</Text>
                     </Button>
                 </View>
@@ -62,7 +70,7 @@ function AccountCard({ navigation, bankName, accountInfo }) {
             {
                 accountInfo != null ? accountInfo.map((account, index) => {
                     return (
-                        <AccountBar key={account.id} navigation={navigation} id={account.id} bankName={bankName} accountType={account.type} accountName={account.name + '(' + account.accountMask + ')'} accountBalance={account.balance} />
+                        <AccountBar key={account.id} navigation={navigation} bankName={bankName} accountInfo={account} />
                     );
                 }) : <View />
             }

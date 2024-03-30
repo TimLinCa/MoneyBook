@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+
 import { MMKV } from 'react-native-mmkv';
 
 class InstitutionToken {
@@ -36,7 +36,13 @@ class Budget {
     this.budget = budget;
     this.amount = 0;
   }
+}
 
+class ExchangeRate {
+  constructor(to_currency, rate) {
+    this.to_currency = to_currency,
+      this.rate = rate;
+  }
 }
 
 // const storage = new MMKV({
@@ -52,11 +58,10 @@ const InstitutionTokenTokenKey = 'InstitutionToken';
 const accountInfo_base = 'accountInfo_';
 const budgetInfo = 'budgetInfo';
 const transactionInfo_base = 'transactionInfo_';
-
+const exchanged_rate = 'exchange_rate'
 export const Test = () => {
 
   const namelist = GetInstitutionNameList();
-  console.log(namelist);
   namelist.forEach((name) => {
     DeleteInstitutionInfo(name);
   }
@@ -83,6 +88,7 @@ export const AddInstitutionToken = (institutionName, token) => {
 
   storage.set(InstitutionTokenTokenKey, JSON.stringify(tokenList));
 };
+
 
 
 export const GetInstitutionIconUrl = (institutionName) => {
@@ -118,6 +124,20 @@ export const GetInstitutionNameList = () => {
   return nameArray;
 };
 
+export const UpdateAccountBalance = (institutionName, asyncBalanceRes) => {
+  const tableName = getAccountTableName(institutionName);
+  let accountInfos = [];
+  if (storage.contains(tableName)) {
+    accountInfos = JSON.parse(storage.getString(tableName));
+  }
+
+  asyncBalanceRes.data.accounts.forEach((account) => {
+    let accountInfo = accountInfos.find((accountInformation) => accountInformation.id === account.account_id);
+    accountInfo.balance = account.balances.available;
+  });
+  storage.set(tableName, JSON.stringify(accountInfos));
+};
+
 export const AsyncInstitutionAccountInfo = (institutionName, auth_getResult) => {
   const tableName = getAccountTableName(institutionName);
   let accountInfos = [];
@@ -138,6 +158,17 @@ export const GetLocalInstitutionAccountInfo = (institutionName) => {
   return accountInfos;
 };
 
+export const UpdateLastAsyncTime = (dateTime) => {
+  storage.set('lastAsyncTime', dateTime);
+};
+
+export const GetLastAsyncTime = () => {
+  if (!storage.contains('lastAsyncTime')) {
+    return null;
+  }
+  return storage.getString('lastAsyncTime');
+};
+
 export const DeleteInstitutionInfo = (institutionName) => {
   storage.getAllKeys().forEach((key) => {
     if (key.includes(institutionName)) {
@@ -154,7 +185,6 @@ export const UpdateTransactionInfo = (institutionName, added, modified, removed,
   const tableName = getTransactionTableName(institutionName);
   const cursorKey = transactionInfo_base + institutionName + '_cursor';
   let transactionInfoList = [];
-  console.log(added);
   if (storage.contains(tableName)) {
     transactionInfoList = JSON.parse(storage.getString(tableName));
   }
@@ -181,11 +211,10 @@ export const UpdateTransactionInfo = (institutionName, added, modified, removed,
   if (cursor !== undefined) {
     storage.set(cursorKey, cursor);
   }
-
   storage.set(tableName, JSON.stringify(transactionInfoList));
 };
 
-export const GetTransactionCusror = (institutionName) => {
+export const GetTransactionCursor = (institutionName) => {
   const cursorKey = transactionInfo_base + institutionName + '_cursor';
   return storage.getString(cursorKey);
 };
@@ -199,24 +228,35 @@ export const GetTransactionHistoryByAccountId = (institutionName, accountId) => 
 };
 
 export const GetTransactionHistoryByMonth = (institutionName, year, month) => {
+  month = ('0' + month).slice(-2);
   const tableName = getTransactionTableName(institutionName);
   let transactionInfoList = JSON.parse(storage.getString(tableName));
   let transactionHistory = transactionInfoList.filter((transaction) => transaction.date.includes(year + '-' + month));
-
   return transactionHistory;
 };
 
+export const GetExpenseTransactionHistoryByMonth = (institutionName, year, month) => {
+  month = ('0' + month).slice(-2);
+  const tableName = getTransactionTableName(institutionName);
+  let transactionInfoList = JSON.parse(storage.getString(tableName));
+  let transactionHistory = transactionInfoList.filter((transaction) => transaction.date.includes(year + '-' + month) && transaction.amount < 0);
+  return transactionHistory;
+}
+
 export const GetExpenseByMonth = (year, month) => {
+  month = ('0' + month).slice(-2);
   let institutionNameList = GetInstitutionNameList();
   let transactionHistory = [];
   institutionNameList.forEach((institutionName) => {
     transactionHistory = transactionHistory.concat(GetTransactionHistoryByMonth(institutionName, year, month));
   });
   transactionHistory = transactionHistory.filter((transaction) => transaction.date.includes(year + '-' + month) && transaction.amount < 0);
+
   return transactionHistory.sum((transaction) => transaction.amount);
 };
 
 export const GetIncomeByMonth = (year, month) => {
+  month = ('0' + month).slice(-2);
   let institutionNameList = GetInstitutionNameList();
   let transactionHistory = [];
   institutionNameList.forEach((institutionName) => {
@@ -227,6 +267,7 @@ export const GetIncomeByMonth = (year, month) => {
 };
 
 export const GetNetIncomeByMonth = (year, month) => {
+  month = ('0' + month).slice(-2);
   return GetIncomeByMonth(year, month) + GetExpenseByMonth(year, month);
 };
 
@@ -242,7 +283,7 @@ export const AddBudgetItem = (budgetName, budget) => {
   storage.set(budgetInfo, JSON.stringify(budgetList));
 };
 
-export const EditBudgetItem = (budgetName, budget, amount) => {
+export const EditBudgetItem = (budgetName, budget) => {
   let budgetList = [];
   if (storage.contains(budgetInfo)) {
     budgetList = JSON.parse(storage.getString(budgetInfo));
@@ -250,18 +291,87 @@ export const EditBudgetItem = (budgetName, budget, amount) => {
     let index = budgetList.map(budgetItem => budgetItem.name).indexOf(budgetName);
     if (index > -1) {
       budgetList[index].budget = budget;
-      budgetList[index].amount = amount;
     }
     storage.set(budgetInfo, JSON.stringify(budgetList));
   }
 };
 
-export const getBudgetInfo = () => {
+export const getBudgetInfo = (year, month) => {
   let budgetList = [];
   if (storage.contains(budgetInfo)) {
     budgetList = JSON.parse(storage.getString(budgetInfo));
   }
+
+  let institutionNameList = GetInstitutionNameList();
+  let transactionHistory = [];
+  institutionNameList.forEach((institutionName) => {
+
+    transactionHistory = transactionHistory.concat(GetExpenseTransactionHistoryByMonth(institutionName, year, month));
+  });
+  budgetList.forEach((budgetItem) => {
+    const transactionHistoryByACategory = transactionHistory.filter((transaction) => transaction.category === budgetItem.name);
+
+    let totalAmount = 0;
+    transactionHistoryByACategory.forEach((transaction) => {
+      totalAmount += transaction.amount;
+    });
+    totalAmount = Math.abs(totalAmount);
+    budgetItem.amount = totalAmount;
+  });
+
   return budgetList;
+};
+
+export const getTotalBalanceByCurrency = () => {
+  let institutionNameList = GetInstitutionNameList();
+  let accountInfoAll = [];
+  institutionNameList.forEach((institutionName) => {
+    let accountInfo = GetLocalInstitutionAccountInfo(institutionName);
+    accountInfoAll = accountInfoAll.concat(accountInfo.filter(account => account.type === 'depository'));
+  });
+
+
+  let accountInfoGroup = accountInfoAll.reduce((accountInfoGroupSofar, { currencyCode, balance }) => {
+    if (!accountInfoGroupSofar[currencyCode]) { accountInfoGroupSofar[currencyCode] = []; }
+    accountInfoGroupSofar[currencyCode].push({ balance });
+    return accountInfoGroupSofar;
+  }, {});
+
+  let totalBalance = [];
+
+  for (const [key, value] of Object.entries(accountInfoGroup)) {
+    let totalBalance_temp = 0;
+    value.forEach(v => { totalBalance_temp += v.balance; });
+    totalBalance.push({ currency: key, balance: totalBalance_temp });
+  }
+
+  return totalBalance;
+};
+
+export const updateExchangedRate = (rateList) => {
+  let exchange_rate_list = [];
+  if (storage.contains(exchanged_rate)) {
+    exchange_rate_list = JSON.parse(storage.getString(exchanged_rate));
+  }
+
+  rateList.forEach(rateItem => {
+    if (exchange_rate_list.filter(rate => rate.to_currency === rateItem.currency).length > 0) {
+      exchange_rate_list.find(rate => rate.to_currency === rateItem.currency).rate = rateItem.rate;
+    } else {
+      exchange_rate_list.push(new ExchangeRate(rateItem.currency, rateItem.rate));
+    }
+  });
+
+  storage.set(exchanged_rate, JSON.stringify(exchange_rate_list));
+};
+
+export const getExchangeRate = (currency) => {
+  let exchange_rate_list = [];
+  if (storage.contains(exchanged_rate)) {
+    exchange_rate_list = JSON.parse(storage.getString(exchanged_rate));
+  }
+
+  return exchange_rate_list.find(rate => rate.to_currency === currency).rate;
 };
 
 
@@ -272,6 +382,7 @@ function getAccountTableName(institutionName) {
 function getTransactionTableName(institutionName) {
   return transactionInfo_base + institutionName;
 }
+
 
 
 
@@ -286,4 +397,9 @@ export default {
   AddBudgetItem,
   EditBudgetItem,
   getBudgetInfo,
+  getTotalBalanceByCurrency,
+  updateExchangedRate,
+  getExchangeRate,
+  GetTransactionCursor,
+  UpdateAccountBalance,
 };

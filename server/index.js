@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const { Configuration, PlaidApi, PlaidEnvironments } = require('plaid');
 require('dotenv').config();
+const converter = require('currency-exchanger-js');
 const app = express();
 const port = 3005;
 app.use(cors());
@@ -27,8 +28,17 @@ const config = new Configuration({
 //Instantiate the Plaid client with the configuration
 const client = new PlaidApi(config);
 
-app.post('/hello', (req, res) => {
-    res.json({ message: 'Hello Worlde04' });
+
+app.post('/get_exchange_rate', async (req, res) => {
+    const currencyList = req.body.currencyList;
+    let exchangeRateList = [];
+
+    for (let currency of currencyList) {
+        currency = currency.toLowerCase();
+        let toCad = await converter.convert(1, currency, "cad");
+        exchangeRateList.push({ currency: currency.toUpperCase(), rate: toCad });
+    }
+    return res.json(exchangeRateList);
 });
 
 //Creates a Link token and return it
@@ -39,8 +49,8 @@ app.post('/api/create_link_token', async (req, res, next) => {
         user: { client_user_id: 'user-id' },
         client_name: 'MoneyBook',
         language: 'en',
-        products: ['auth'],
-        required_if_supported_products: ['transactions'],
+        products: ['auth', 'assets'],
+        required_if_supported_products: ['transactions', 'liabilities'],
         country_codes: ['CA'],
         android_package_name: process.env.PLAID_ANDROID_PACKAGE_NAME,
     };
@@ -55,6 +65,16 @@ app.post('/auth', async function (req, res) {
     }
     catch (e) {
         res.status(500).send('auth failed error: ' + e);
+    }
+});
+
+app.post('/async_balance', async function (req, res) {
+    try {
+        const plaidResponse = await client.accountsBalanceGet({ access_token: req.body.access_token });
+        res.json(plaidResponse.data);
+    }
+    catch (e) {
+        res.status(500).send('async_balance failed error: ' + e);
     }
 });
 

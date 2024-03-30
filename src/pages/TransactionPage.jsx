@@ -10,7 +10,7 @@ import TransactionBar from '@components/account/TransactionBar';
 
 
 function TransactionPage({ route, navigation }) {
-    console.log(route);
+
     const [accountName, setAccountName] = useState(route['params'].accountInfoName['accountName']);
     const [accountBalance, setAccountBalance] = useState(route['params'].accountBalance['accountBalance']);
     const [transactionHistoryList, setTransactionHistoryList] = useState([]);
@@ -23,7 +23,8 @@ function TransactionPage({ route, navigation }) {
         setAccountName(route['params'].accountInfoName['accountName']);
         setAccountBalance(route['params'].accountBalance['accountBalance']);
         setTransactionHistoryList(GetTransactionHistoryByAccountId(route['params'].institutionName['bankName'],
-            route['params'].accountId['id']));
+            route['params'].accountId['accountId']));
+
     }, [route]);
 
     return (
@@ -46,7 +47,7 @@ function RenderHeader(accountName, accountBalance, returnToAccountPage) {
                 </TouchableOpacity>
             </View>
             <View style={styles.balanceSpace}>
-                <Text style={styles.balanceText}>${accountBalance}</Text>
+                <Text style={styles.balanceText}>${accountBalance.toLocaleString()}</Text>
             </View>
         </View >
     );
@@ -54,7 +55,7 @@ function RenderHeader(accountName, accountBalance, returnToAccountPage) {
 
 function RenderTransactionBars(transactionHistory) {
     return (
-        <ScrollView>
+        <ScrollView style={styles.barContainer}>
             {
                 transactionHistory.map((transaction, index) => {
                     return (
@@ -124,5 +125,8 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
         textAlign: 'center',
         verticalAlign: 'middle',
+    },
+    barContainer: {
+        marginBottom: SIZES.height * 0.15,
     },
 });

@@ -3,49 +3,50 @@ import { View, Text, StyleSheet } from 'react-native';
 import { COLORS, SIZES, FONTS } from '@styles';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import { SafeAreaView } from 'react-native-safe-area-context';
+
 function MainAsset({ cadBalance, usdBalance, othersBalance }) {
-    const [asset, setAsset] = React.useState(0);
-    const [cad, setCad] = React.useState(0);
-    const [usd, setUsd] = React.useState(0);
-    const [others, setOthers] = React.useState(0);
+  const [asset, setAsset] = React.useState(0);
+  const [cad, setCad] = React.useState(0);
+  const [usd, setUsd] = React.useState(0);
+  const [others, setOthers] = React.useState(0);
 
-    useEffect(() => {
-        setCad(cadBalance);
-        setOthers(othersBalance);
-        setUsd(usdBalance);
-        setAsset(cadBalance + usdBalance + othersBalance);
-    }, [cadBalance, usdBalance, othersBalance]);
+  useEffect(() => {
+    setCad(cadBalance);
+    setOthers(othersBalance);
+    setUsd(usdBalance);
+    setAsset(cadBalance + usdBalance + othersBalance);
+  }, [cadBalance, usdBalance, othersBalance]);
 
 
-    return (
-        <SafeAreaView style={styles.safeView}>
-            <View style={styles.assetView}>
-                <View style={styles.viewStart}>
-                    <FontAwesome6 name='sack-dollar' size={30} color={COLORS.black} />
-                </View>
-                <View style={styles.viewEnd}>
-                    <Text style={styles.currentTextH1}>$ {asset.toLocaleString()}</Text>
-                </View>
-            </View>
+  return (
+    <SafeAreaView style={styles.safeView}>
+      <View style={styles.assetView}>
+        <View style={styles.viewStart}>
+          <FontAwesome6 name='sack-dollar' size={30} color={COLORS.black} />
+        </View>
+        <View style={styles.viewEnd}>
+          <Text style={styles.currentTextH1}>$ {asset.toLocaleString()}</Text>
+        </View>
+      </View>
 
-            <View style={{ backgroundColor: COLORS.white, marginTop: SIZES.padding * 1.5 }}>
-                <View style={styles.summaryView}>
-                    <View style={styles.currencyLabelTextContainer}>
-                        <Text style={styles.currencyLabelText}>CAD</Text>
-                    </View>
-                    <View style={styles.currentTextContainer} >
-                        <Text style={styles.currentText}>$ {cad.toLocaleString()}</Text>
-                    </View>
-                </View>
+      <View style={{ backgroundColor: COLORS.white, marginTop: SIZES.padding * 1.5 }}>
+        <View style={styles.summaryView}>
+          <View style={styles.currencyLabelTextContainer}>
+            <Text style={styles.currencyLabelText}>CAD</Text>
+          </View>
+          <View style={styles.currentTextContainer} >
+            <Text style={styles.currentText}>$ {cad.toLocaleString()}</Text>
+          </View>
+        </View>
 
-                <View style={styles.summaryView}>
-                    <View style={styles.currencyLabelTextContainer}>
-                        <Text style={styles.currencyLabelText}>USD</Text>
-                    </View>
-                    <View style={styles.currentTextContainer} >
-                        <Text style={styles.currentText}>$ {usd.toLocaleString()}</Text>
-                    </View>
-                </View>
+        <View style={styles.summaryView}>
+          <View style={styles.currencyLabelTextContainer}>
+            <Text style={styles.currencyLabelText}>USD</Text>
+          </View>
+          <View style={styles.currentTextContainer} >
+            <Text style={styles.currentText}>$ {usd.toLocaleString()}</Text>
+          </View>
+        </View>
 
         <View style={styles.summaryView}>
           <View style={styles.currencyLabelTextContainer}>
@@ -76,6 +77,7 @@ const styles = StyleSheet.create({
   viewStart: {
     flex: 1,
     alignItems: 'flex-start',
+    alignSelf: 'center',
   },
   viewEnd: {
     flex: 2,

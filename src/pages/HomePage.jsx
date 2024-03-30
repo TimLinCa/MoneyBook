@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
 
 import { Button } from '@rneui/themed';
 import { useState } from 'react';
@@ -11,13 +11,122 @@ import MainAsset from '@components/main/MainAsset';
 import MainDebt from '@components/main/MainDebt';
 import MainBudget from '@components/main/MainBudget';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
-
+import moment from 'moment';
+var momenttz = require('moment-timezone');
+import { UpdateLastAsyncTime, GetLastAsyncTime, getTotalBalanceByCurrency, updateExchangedRate, getExchangeRate, getBudgetInfo, UpdateAccountBalance, GetTransactionCursor, GetInstitutionToken, AddInstitutionToken, AsyncInstitutionAccountInfo, GetInstitutionNameList, GetLocalInstitutionAccountInfo, Test, UpdateTransactionInfo } from '@store/mmkv';
+import NetInfo from "@react-native-community/netinfo";
+import axios from 'axios';
+const address = '10.0.0.153';
+axios.defaults.baseURL = `http://${address}:3005`;
 //This page will show the user's summary of their accounts such as total balance and loan and budget information.
 
 const Tab = createMaterialTopTabNavigator();
 
-function renderHeader() {
+function HomePage({ navigation }) {
+  const [cadBalance, setCadBalance] = useState(0);
+  const [usdBalance, setUsdBalance] = useState(0);
+  const [othersBalance, setOthersBalance] = useState(0);
+  const [creditDebt, setCreditDebt] = useState(0);
+  const [loanDebt, setLoanDebt] = useState(0);
+  const [budgetList, setBudgetList] = useState([]);
+  const [isAsync, setIsAsync] = useState(false);
+  const [currentDate, setCurrentDate] = useState('');
+  const [lastAsyncText, setLastAsyncText] = useState('');
+
+  const asyncAccount = async () => {
+    setIsAsync(true);
+
+    const institutionNameList = GetInstitutionNameList();
+    for (let institutionName of institutionNameList) {
+      const accToken = GetInstitutionToken(institutionName);
+      const authRes = await axios.post('/async_balance', { access_token: accToken });
+      UpdateAccountBalance(institutionName, authRes);
+      let hasMore = true;
+      let cursor = GetTransactionCursor(institutionName);
+      while (hasMore) {
+        let asyncTransaction = await axios.post('/asyncTransactions', { access_token: accToken, cursor: cursor });
+        UpdateTransactionInfo(institutionName, asyncTransaction.data.added, asyncTransaction.data.modified, asyncTransaction.data.removed, asyncTransaction.data.cursor);
+        cursor = asyncTransaction.data.cursor;
+        hasMore = asyncTransaction.data.has_more;
+      }
+    }
+    UpdateLastAsyncTime(moment().tz(momenttz.tz.guess()).format('YYYY-MM-DD HH:mm:ss'));
+    setIsAsync(false);
+  };
+
+
+  useEffect(() => {
+    const renderTotalBalanceByCurrency = async () => {
+      let cadBalance_temp = 0;
+      let usdBalance_temp = 0;
+      let othersBalance_temp = 0;
+
+      let netConnect = false;
+      let IsInternetReachable = false;
+      await NetInfo.fetch().then(state => {
+        netConnect = state.isConnected;
+        IsInternetReachable = state.isInternetReachable;
+      });
+      if (netConnect && IsInternetReachable) {
+        const exchangeRateRes = await axios.post('/get_exchange_rate', { currencyList: ['usd', 'twd'] });
+        updateExchangedRate(exchangeRateRes.data);
+      }
+      const totalBalanceByCurrency = getTotalBalanceByCurrency();
+
+      totalBalanceByCurrency.forEach(tb => {
+
+        if (tb.currency === 'CAD') {
+          cadBalance_temp = tb.balance;
+        }
+        else {
+          const rate = getExchangeRate(tb.currency);
+          if (tb.currency === 'USD') {
+            usdBalance_temp = tb.balance * rate;
+          }
+          else {
+            othersBalance_temp += tb.balance * rate;
+          }
+        }
+      });
+
+      setCadBalance(cadBalance_temp);
+      setUsdBalance(usdBalance_temp);
+      setOthersBalance(othersBalance_temp);
+      setBudgetList(getBudgetInfo(new Date().getFullYear(), new Date().getMonth() + 1));
+    };
+
+    const renderAsyncDate = async () => {
+      const currentDate_temp = new Date();
+      let monthString = moment().tz(momenttz.tz.guess()).format('MMM');
+      let dateDayString = currentDate_temp.getDate();
+      let dayString = moment().tz(momenttz.tz.guess()).format('dddd');
+      dayString = dayString.substring(0, 3);
+      let string = monthString + ', ' + dateDayString + '(' + dayString + ')';
+      setCurrentDate(string);
+      setLastAsyncText(moment(GetLastAsyncTime(), 'YYYY-MM-DD HH:mm:ss').fromNow());
+    };
+    const unsubscribe = navigation.addListener('focus', () => {
+      renderTotalBalanceByCurrency();
+      renderAsyncDate();
+    });
+
+    renderTotalBalanceByCurrency();
+    renderAsyncDate();
+    return unsubscribe;
+
+  }, [navigation, isAsync]);
+
+  return (
+    <SafeAreaView style={{ flex: 1, paddingBottom: 10 }}>
+      {renderHeader(asyncAccount, isAsync, currentDate, lastAsyncText)}
+      {renderSummaryInfo(cadBalance, usdBalance, othersBalance, creditDebt, loanDebt)}
+      {renderBudgetInfo(budgetList)}
+    </SafeAreaView>
+  );
+}
+
+
+function renderHeader(asyncAccount, isAsync, currentDate, lastAsyncText) {
 
   return (
     <View
@@ -38,12 +147,12 @@ function renderHeader() {
         </TouchableOpacity>
         <View style={{ flexDirection: 'row', marginTop: 20 }}>
           <View>
-            <Text style={{ ...FONTS.h2, color: COLORS.white }}>Feb, 20(Tue)</Text>
-            <Text style={{ ...FONTS.h4, color: COLORS.lightGray }}>Async 3 minute ago</Text>
+            <Text style={{ ...FONTS.h2, color: COLORS.white }}>{currentDate}</Text>
+            <Text style={{ ...FONTS.h4, color: COLORS.lightGray }}>Async {lastAsyncText}</Text>
           </View>
           <View style={{ flex: 2, alignItems: "flex-end", marginRight: SIZES.padding }}>
-            <Button color={COLORS.darkYellow}>
-              <Icon name="rotate-3d-variant" size={25} color={COLORS.white} />
+            <Button onPress={() => asyncAccount()} color={COLORS.darkYellow}>
+              {isAsync ? <ActivityIndicator color={COLORS.white} style={styles.buttonIcon} animating={isAsync} /> : <Icon style={styles.buttonIcon} name="rotate-3d-variant" size={20} color={COLORS.white} />}
               Async
             </Button>
           </View>
@@ -53,17 +162,16 @@ function renderHeader() {
   );
 }
 
-function renderSummaryInfo(netAsset) {
+function renderSummaryInfo(cadBalance, usdBalance, othersBalance, creditDebt, loanDebt) {
+  const netAsset = cadBalance + usdBalance + othersBalance - creditDebt - loanDebt;
   return (
-    <TouchableOpacity style={styles.summaryInfo}>
+    <View style={styles.summaryInfo}>
       <View>
         <View style={{ flexDirection: 'row', height: SIZES.height * 0.045 }}>
           <View style={{ flex: 1 }}>
             <Text style={{ color: COLORS.black, fontSize: SIZES.h3, flex: 1, marginTop: SIZES.padding * 1.2, marginLeft: SIZES.padding * 1.5 }}>Net asset</Text>
           </View>
-          <View style={{ flex: 2, alignItems: 'flex-end', marginTop: SIZES.padding * 1.5, marginRight: SIZES.padding * 1.5 }}>
-            <Text>＞</Text>
-          </View>
+
         </View>
         <View style={{ alignItems: 'flex-start', height: SIZES.height * 0.0562 }}>
           <Text style={{ color: COLORS.green, fontWeight: 700, fontSize: SIZES.h1, marginLeft: SIZES.padding * 1.5 }}>$ {netAsset.toLocaleString()}</Text>
@@ -79,65 +187,38 @@ function renderSummaryInfo(netAsset) {
               tabBarIndicatorContainerStyle: { width: '100%' },
               tabBarLabelStyle: { fontSize: SIZES.body5, fontWeight: 'bold' },
               tabBarStyle: { backgroundColor: COLORS.lightGray, borderRadius: 20, margin: SIZES.padding, width: '99.9%', height: '10%', alignSelf: 'center' },
-              tabBarContentContainerStyle: { alignItems: 'center', alignSelf: 'center' }
+              tabBarContentContainerStyle: { alignItems: 'center', alignSelf: 'center' },
             }}
           >
-            <Tab.Screen name="Asset" children={() => <MainAsset cadBalance={10000.12} usdBalance={5000} othersBalance={0} />} />
-            <Tab.Screen name="DEBT" children={() => <MainDebt creditCardDebt={10000} />} />
+            <Tab.Screen name="Asset" children={() => <MainAsset cadBalance={cadBalance} usdBalance={usdBalance} othersBalance={othersBalance} />} />
+            <Tab.Screen name="DEBT" children={() => <MainDebt creditCardDebt={creditDebt} loanDebt={loanDebt} />} />
           </Tab.Navigator>
         </NavigationContainer>
       </View>
-    </TouchableOpacity >
+    </View >
 
   );
 }
 
-function renderBudgetInfo() {
+function renderBudgetInfo(budgetList) {
   return (
     <ScrollView style={styles.budgetInfo}>
-      <MainBudget
-        style={styles.BudgetBar}
-        name="Grocery"
-        max={2000}
-        min={0}
-        value={500}
-        barWidth={SIZES.width * 0.65}
-      />
-      <MainBudget
-        style={styles.BudgetBar}
-        name="Gasoline"
-        max={1000}
-        min={0}
-        value={800}
-        barWidth={SIZES.width * 0.65}
-      />
-      <MainBudget
-        style={styles.BudgetBar}
-        name="Travel"
-        max={500}
-        min={0}
-        value={450}
-        barWidth={SIZES.width * 0.65}
-      />
+      {
+        budgetList.map((budget, index) => {
+          return (
+            <MainBudget
+              key={index}
+              name={budget.name}
+              max={budget.budget}
+              min={0}
+              value={budget.amount}
+              barWidth={SIZES.width * 0.65}
+            />
+          );
+        })
+      }
+
     </ScrollView>
-  );
-}
-
-function HomePage() {
-  const [netAsset, setNetAsset] = useState(0);
-
-  useEffect(() => {
-    setNetAsset(5000.12);
-  }, []);
-
-
-
-  return (
-    <SafeAreaView style={{ flex: 1, paddingBottom: 10 }}>
-      {renderHeader()}
-      {renderSummaryInfo(netAsset)}
-      {renderBudgetInfo()}
-    </SafeAreaView>
   );
 }
 
@@ -176,7 +257,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     top: SIZES.height * 0.59,
-    height: SIZES.height * 0.335,
+    height: SIZES.height * 0.315,
     backgroundColor: COLORS.white,
     marginLeft: SIZES.padding,
     marginRight: SIZES.padding,
@@ -192,6 +273,7 @@ const styles = StyleSheet.create({
     paddingLeft: SIZES.padding,
     paddingRight: SIZES.padding,
     paddingTop: SIZES.padding,
+
   },
   headerContainer: {
     width: '100%',
