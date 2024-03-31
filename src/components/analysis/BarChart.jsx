@@ -1,12 +1,6 @@
-import React from 'react';
-import {COLORS, SIZES, FONTS} from '../../../styles';
-import {BarChart} from 'react-native-chart-kit';
-import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
-import {NavigationContainer} from '@react-navigation/native';
-import MainAsset from '@components/main/MainAsset';
-import MainDebt from '@components/main/MainDebt';
-import {SafeAreaView} from 'react-native-safe-area-context';
-
+import React, { useEffect, useState } from 'react';
+import { COLORS, SIZES, FONTS } from '../../../styles';
+import { VictoryBar, VictoryChart, VictoryTheme, VictoryAxis } from "victory-native";
 import {
   ScrollView,
   StyleSheet,
@@ -16,59 +10,29 @@ import {
   TouchableOpacity,
 } from 'react-native';
 
-const mockData = {
-  labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-  datasets: [
-    {
-      data: [1000, 2000, 1500, 3000, 2500, 2000],
-    },
-  ],
-};
+function BarChart({ chartData, color }) {
+  const [barColor, setBarColor] = useState(COLORS.green);
+  const [data, setData] = useState([]);
 
-const chartConfig = {
-  backgroundGradientFrom: '#fff',
-  backgroundGradientTo: '#fff',
-  decimalPlaces: 0,
-  color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-  barPercentage: 0.5,
-};
+  useEffect(() => {
 
-function Chart() {
+    setData(chartData);
+    setBarColor(color);
+  }, [chartData, color]);
+
   return (
     <View style={styles.safeView}>
-      <Text>Income Screen</Text>
-      <BarChart
-        data={mockData}
-        width={300}
-        height={200}
-        yAxisSuffix="$"
-        chartConfig={chartConfig}
-      />
+      <VictoryChart width={SIZES.width * 0.9} theme={VictoryTheme.material}
+        domainPadding={{ x: 20 }}>
+        <VictoryAxis crossAxis />
+        <VictoryAxis dependentAxis crossAxis
+          tickFormat={(t) => `${Math.round(t / 1000)}k`}
+        />
+        <VictoryBar style={{
+          data: { fill: barColor }
+        }} data={data} x="month" y="amount" />
+      </VictoryChart>
     </View>
-
-    // <ScrollView contentContainerStyle={styles.scrollView}>
-    //   <View style={styles.container}>
-    //     <BarChart
-    //       data={{
-    //         labels: ['January', 'February', 'March', 'April', 'May'],
-    //         datasets: [
-    //           {
-    //             data: [4000, 3000, 4000, 3000, 6000],
-    //           },
-    //         ],
-    //       }}
-    //       width={Dimensions.get('window').width * 0.95}
-    //       height={230}
-    //       yAxisLabel="$"
-    //       yAxisSuffix=""
-    //       yAxisInterval={1000}
-    //       chartConfig={chartConfig}
-    //       bezier
-    //       style={styles.barChartContainer}
-    //       fromZero
-    //     />
-    //   </View>
-    // </ScrollView>
   );
 }
 
@@ -79,7 +43,11 @@ const styles = StyleSheet.create({
   },
   safeView: {
     backgroundColor: COLORS.white,
-    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 2,
+    borderColor: 'black',
+    padding: 30,
   },
   headerContainer: {
     width: '100%',
@@ -176,4 +144,4 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 });
-export default Chart;
+export default BarChart;

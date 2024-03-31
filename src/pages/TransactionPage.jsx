@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         marginLeft: SIZES.padding,
         marginRight: SIZES.padding,
-        justifyContent: 'center'
+        justifyContent: 'center',
     },
     balanceText: {
         color: COLORS.black,

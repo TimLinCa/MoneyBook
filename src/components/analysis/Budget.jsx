@@ -1,5 +1,5 @@
-import React from 'react';
-import {COLORS, SIZES, FONTS} from '../../../styles';
+import React, { useEffect } from 'react';
+import { COLORS, SIZES, FONTS } from '../../../styles';
 import {
   ScrollView,
   StyleSheet,
@@ -13,20 +13,12 @@ import AddIcon from 'react-native-vector-icons/Feather';
 import PencilIcon from 'react-native-vector-icons/EvilIcons';
 import TrashIcon from 'react-native-vector-icons/EvilIcons';
 import RNPickerSelect from 'react-native-picker-select';
-import {AddBudgetItem} from '../../store/mmkv';
-import {EditBudgetItem} from '../../store/mmkv';
+import { AddBudgetItem, DeleteBudgetItem, GetBudgetList } from '../../store/mmkv';
+import { EditBudgetItem } from '../../store/mmkv';
 
 function Budget() {
   const [budget, setBudget] = React.useState([]);
-
   const [total, setTotal] = React.useState(0);
-
-  React.useEffect(() => {
-    // Calculate total when budget changes
-    const newTotal = budget.reduce((acc, item) => acc + item.value, 0);
-    setTotal(newTotal);
-  }, [budget]);
-
   const [addModalVisible, setAddModalVisible] = React.useState(false);
   const [editModalVisible, setEditModalVisible] = React.useState(false);
   const [newBudgetItem, setNewBudgetItem] = React.useState({
@@ -37,6 +29,31 @@ function Budget() {
     key: '',
     value: null,
   });
+
+
+
+
+  useEffect(() => {
+    const budgetList = GetBudgetList();
+    console.log('retrieved budget list');
+    budgetList.map(item => {
+      item.key = item.name;
+      item.value = item.budget;
+    });
+    budgetList.forEach(item => {
+      delete item.name;
+      delete item.budget;
+    });
+    setBudget(budgetList);
+  }, [addModalVisible, editModalVisible]);
+
+  React.useEffect(() => {
+    // Calculate total when budget changes
+    const newTotal = budget.reduce((acc, item) => acc + item.value, 0);
+    setTotal(newTotal);
+  }, [budget]);
+
+
 
   const handleAddIconPress = () => {
     setAddModalVisible(true);
@@ -49,12 +66,13 @@ function Budget() {
     setEditModalVisible(true);
   };
 
-  const handleTrashIconPress = clickedItem => {
-    // Filter out the clicked item and update the state
-    const updatedBudget = budget.filter(
-      budgetItem => budgetItem.key !== clickedItem.key,
-    );
-    setBudget(updatedBudget);
+  const emptyMethod = (value) => {
+
+  };
+
+  const handleDeleteBudget = (budgetName) => {
+    DeleteBudgetItem(budgetName);
+    setEditModalVisible(false);
   };
 
   const handleSaveNewBudgetItem = () => {
@@ -68,14 +86,14 @@ function Budget() {
     // Update the budget state with the new item
     setBudget(prevBudget => [
       ...prevBudget,
-      {key: newBudgetItem.key, value: newBudgetItem.value},
+      { key: newBudgetItem.key, value: newBudgetItem.value },
     ]);
 
     // Close the modal
     setAddModalVisible(false);
 
     // Clear the newBudgetItem state for the next entry
-    setNewBudgetItem({key: '', value: null});
+    setNewBudgetItem({ key: '', value: null });
   };
 
   const handleSaveEditItem = () => {
@@ -84,31 +102,24 @@ function Budget() {
       // You can display an error message here
       return;
     }
-    EditBudgetItem(selectedItem.key, newBudgetItem.key, newBudgetItem.value);
 
-    setBudget(prevBudget => {
-      return prevBudget.map(item => {
-        if (item.key === selectedItem.key) {
-          // Replace the existing item with the updated one
-          return {key: newBudgetItem.key, value: newBudgetItem.value};
-        }
-        return item; // Return the original item if the key doesn't match
-      });
-    });
+    EditBudgetItem(newBudgetItem.key, newBudgetItem.value);
 
     setEditModalVisible(false); // Close the edit modal
-    setNewBudgetItem({key: '', value: null});
+    setNewBudgetItem({ key: '', value: null });
   };
 
   return (
     <View>
-      <Text style={styles.componentTitle}>Your Budget</Text>
-      <View style={styles.summaryIconView}>
-        <TouchableOpacity
-          onPress={handleAddIconPress}
-          style={styles.iconContainer}>
-          <AddIcon name="plus-circle" size={30} color="#000" />
-        </TouchableOpacity>
+      <View style={styles.yourBudgetHeaderContainer}>
+        <Text style={styles.componentTitle}>Your Budget</Text>
+        <View style={styles.summaryIconView}>
+          <TouchableOpacity
+            onPress={handleAddIconPress}
+            style={styles.iconContainer}>
+            <AddIcon name="plus-circle" size={30} color="#000" />
+          </TouchableOpacity>
+        </View>
 
         {/* add new item */}
         <Modal
@@ -125,50 +136,62 @@ function Budget() {
 
             {/* Modal content */}
             <View style={styles.modalView}>
-              {/* Replace TextInput for budget item name with RNPickerSelect */}
-              <RNPickerSelect
-                placeholder={{label: 'Select budget item', value: null}}
-                onValueChange={value =>
-                  setNewBudgetItem({...newBudgetItem, key: value})
-                }
-                items={[
-                  {label: 'BANK_FEES', value: 'BANK_FEES'},
-                  {label: 'ENTERTAINMENT', value: 'ENTERTAINMENT'},
-                  {label: 'FOOD_AND_DRINK', value: 'FOOD_AND_DRINK'},
-                  {label: 'GENERAL_MERCHANDISE', value: 'GENERAL_MERCHANDISE'},
-                  {label: 'GENERAL_SERVICES', value: 'GENERAL_SERVICES'},
-                  {
-                    label: 'GOVERNMENT_AND_NON_PROFIT',
-                    value: 'GOVERNMENT_AND_NON_PROFIT',
-                  },
-                  {label: 'HOME_IMPROVEMENT', value: 'HOME_IMPROVEMENT'},
-                  {label: 'LOAN_PAYMENTS', value: 'LOAN_PAYMENTS'},
-                  {label: 'MEDICAL', value: 'MEDICAL'},
-                  {label: 'PERSONAL_CARE', value: 'PERSONAL_CARE'},
-                  {label: 'RENT_AND_UTILITIES', value: 'RENT_AND_UTILITIES'},
+              <View style={styles.editHeader}>
+                <Text style={styles.ModalHeaderTitle}>Add Budget</Text>
+              </View>
+              <View style={{ paddingBottom: 20, paddingLeft: 20, paddingRight: 20 }}>
+                <RNPickerSelect
+                  placeholder={{ label: 'Select budget item', value: null }}
+                  onValueChange={value =>
+                    setNewBudgetItem({ ...newBudgetItem, key: value })
+                  }
+                  items={[
+                    { label: 'BANK_FEES', value: 'BANK_FEES' },
+                    { label: 'ENTERTAINMENT', value: 'ENTERTAINMENT' },
+                    { label: 'FOOD_AND_DRINK', value: 'FOOD_AND_DRINK' },
+                    { label: 'GENERAL_MERCHANDISE', value: 'GENERAL_MERCHANDISE' },
+                    { label: 'GENERAL_SERVICES', value: 'GENERAL_SERVICES' },
+                    {
+                      label: 'GOVERNMENT_AND_NON_PROFIT',
+                      value: 'GOVERNMENT_AND_NON_PROFIT',
+                    },
+                    { label: 'HOME_IMPROVEMENT', value: 'HOME_IMPROVEMENT' },
+                    { label: 'LOAN_PAYMENTS', value: 'LOAN_PAYMENTS' },
+                    { label: 'MEDICAL', value: 'MEDICAL' },
+                    { label: 'PERSONAL_CARE', value: 'PERSONAL_CARE' },
+                    { label: 'RENT_AND_UTILITIES', value: 'RENT_AND_UTILITIES' },
 
-                  {label: 'TRANSPORTATION', value: 'TRANSPORTATION'},
-                  {label: 'TRAVEL', value: 'TRAVEL'},
-                ]}
-              />
-              {/* Use TextInput for entering budget item value */}
-              <TextInput
-                placeholder="Enter budget item value"
-                keyboardType="numeric"
-                value={
-                  newBudgetItem.value ? newBudgetItem.value.toString() : ''
-                }
-                onChangeText={text => {
-                  const numValue = text !== '' ? parseFloat(text) : null;
-                  setNewBudgetItem({...newBudgetItem, value: numValue});
-                }}
-              />
-              <TouchableOpacity onPress={handleSaveNewBudgetItem}>
-                <Text>Save</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => setAddModalVisible(false)}>
-                <Text>Cancel</Text>
-              </TouchableOpacity>
+                    { label: 'TRANSPORTATION', value: 'TRANSPORTATION' },
+                    { label: 'TRAVEL', value: 'TRAVEL' },
+                  ]}
+                />
+                {/* Use TextInput for entering budget item value */}
+                <TextInput
+                  style={{ marginLeft: SIZES.padding, marginBottom: SIZES.padding, fontSize: SIZES.h3 }}
+                  placeholder="Enter budget item value"
+                  keyboardType="numeric"
+                  value={
+                    newBudgetItem.value ? newBudgetItem.value.toString() : ''
+                  }
+                  onChangeText={text => {
+                    const numValue = text !== '' ? parseFloat(text) : null;
+                    setNewBudgetItem({ ...newBudgetItem, value: numValue });
+                  }}
+                />
+
+                <View style={styles.ModalButtonContainer}>
+                  <TouchableOpacity style={{ flex: 0, width: '50%', alignItems: 'center' }} onPress={handleSaveNewBudgetItem}>
+                    <Text style={{ color: COLORS.green }}>Save</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={{ flex: 0, width: '50%', alignItems: 'center' }} onPress={() => setAddModalVisible(false)}>
+                    <Text style={{ color: COLORS.red }}>Cancel</Text>
+                  </TouchableOpacity>
+                </View>
+
+              </View>
+              {/* Replace TextInput for budget item name with RNPickerSelect */}
+
+
             </View>
           </View>
         </Modal>
@@ -187,34 +210,54 @@ function Budget() {
             />
 
             {/* Edit modal content */}
+
             <View style={styles.modalView}>
+              <View style={styles.editHeader}>
+                <Text style={styles.ModalHeaderTitle}>Edit Budget</Text>
+              </View>
+              <View style={{ paddingBottom: 20, paddingLeft: 20, paddingRight: 20 }}>
+                <RNPickerSelect
+                  placeholder={{
+                    label: selectedItem.key,
+                    value: selectedItem.key,
+
+                  }}
+                  onValueChange={value =>
+                    emptyMethod(value)
+                  }
+                  disabled={true} // Make RNPickerSelect unclickable
+                  items={budget.map(item => ({ label: item.key, value: item.key }))}
+                />
+                {/* Use TextInput for entering budget item value */}
+                <TextInput
+                  style={{ marginLeft: SIZES.padding, marginBottom: SIZES.padding, fontSize: SIZES.h3 }}
+                  placeholder="Enter new budget item value"
+                  keyboardType="numeric"
+                  value={
+                    newBudgetItem.value ? newBudgetItem.value.toString() : ''
+                  }
+                  onChangeText={text => {
+                    const numValue = text !== '' ? parseFloat(text) : null;
+                    setNewBudgetItem({ ...newBudgetItem, value: numValue });
+                  }}
+                />
+                <View style={styles.ModalButtonContainer}>
+                  <TouchableOpacity style={{ flex: 0, width: '33%', alignItems: 'center' }} onPress={handleSaveEditItem}>
+                    <Text style={{ color: COLORS.green }}>Save</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={{ flex: 1, width: '33%', alignItems: 'center' }} onPress={() => setEditModalVisible(false)}>
+                    <Text>Cancel</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={{ flex: 1, width: '33%', alignItems: 'center' }} onPress={() => handleDeleteBudget(selectedItem.key)}>
+                    <Text style={{ color: COLORS.red }}>Delete</Text>
+                  </TouchableOpacity>
+                </View>
+
+
+              </View>
               {/* Use RNPickerSelect for selecting budget item name */}
-              <RNPickerSelect
-                placeholder={{
-                  label: selectedItem.key,
-                  value: selectedItem.key,
-                }}
-                disabled={true} // Make RNPickerSelect unclickable
-                items={budget.map(item => ({label: item.key, value: item.key}))}
-              />
-              {/* Use TextInput for entering budget item value */}
-              <TextInput
-                placeholder="Enter new budget item value"
-                keyboardType="numeric"
-                value={
-                  newBudgetItem.value ? newBudgetItem.value.toString() : ''
-                }
-                onChangeText={text => {
-                  const numValue = text !== '' ? parseFloat(text) : null;
-                  setNewBudgetItem({...newBudgetItem, value: numValue});
-                }}
-              />
-              <TouchableOpacity onPress={handleSaveEditItem}>
-                <Text>Save</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => setEditModalVisible(false)}>
-                <Text>Cancel</Text>
-              </TouchableOpacity>
+
+
             </View>
           </View>
         </Modal>
@@ -226,7 +269,7 @@ function Budget() {
         {/* Rendering the state array */}
         {budget.map((item, index) => (
           <React.Fragment key={item.key}>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => handlePencilIconPress(item)}>
               <View style={styles.summaryView}>
                 <View style={styles.currencyLabelTextContainer}>
                   <Text style={styles.currencyLabelText}>{item.key}</Text>
@@ -234,16 +277,6 @@ function Budget() {
                 <View style={styles.currentTextContainer}>
                   <Text style={styles.currentText}>$ {item.value}</Text>
                 </View>
-                <TouchableOpacity
-                  onPress={() => handlePencilIconPress(item)}
-                  style={styles.iconContainer}>
-                  <PencilIcon name="pencil" size={30} color="#000" />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => handleTrashIconPress(item)} // Pass item as an argument
-                  style={styles.iconContainer}>
-                  <TrashIcon name="trash" size={30} color="#000" />
-                </TouchableOpacity>
               </View>
             </TouchableOpacity>
             {<View style={styles.divider} />}
@@ -251,7 +284,7 @@ function Budget() {
         ))}
 
         {/*Total*/}
-        <View style={[styles.summaryView, {marginTop: 25}]}>
+        <View style={[styles.summaryView, { marginTop: 25 }]}>
           <View style={styles.currencyLabelTextContainer}>
             <Text style={styles.currencyLabelText}>Total</Text>
           </View>
@@ -262,10 +295,20 @@ function Budget() {
         <View style={styles.divider} />
       </View>
     </View>
+
   );
 }
 
 const styles = StyleSheet.create({
+  yourBudgetHeaderContainer: {
+    flexDirection: 'row',
+  },
+  ModalHeaderTitle: {
+    fontSize: SIZES.h3,
+    color: COLORS.white,
+    alignSelf: 'center',
+    textAlign: 'center',
+  },
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -282,9 +325,8 @@ const styles = StyleSheet.create({
   modalView: {
     backgroundColor: 'white',
     borderRadius: 10,
-    padding: 20,
     width: '80%',
-    alignItems: 'center',
+
   },
   headerContainer: {
     width: '100%',
@@ -308,7 +350,7 @@ const styles = StyleSheet.create({
   },
   componentTitle: {
     color: COLORS.black,
-    fontSize: SIZES.h1,
+    fontSize: SIZES.h2,
     marginLeft: SIZES.padding,
   },
   box: {
@@ -326,11 +368,13 @@ const styles = StyleSheet.create({
   },
   summaryIconView: {
     marginRight: SIZES.padding,
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
+    position: 'absolute',
+    right: 0,
+    alignSelf: 'center',
   },
   iconContainer: {
     marginLeft: 2,
+
   },
   currencyLabelText: {
     verticalAlign: 'middle',
@@ -370,6 +414,26 @@ const styles = StyleSheet.create({
     marginLeft: 10, // Horizontal margin
     marginRight: 10,
     borderRadius: 16,
+  },
+  ModalButtonContainer: {
+    flexDirection: 'row',
+
+  },
+  editHeader: {
+    width: '100%',
+    height: SIZES.height * 0.04,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.29,
+    shadowRadius: 4.65,
+    elevation: 7,
+    backgroundColor: COLORS.navyBlue,
+    borderTopEndRadius: 10,
+    borderTopStartRadius: 10,
+    justifyContent: 'center',
   },
 });
 

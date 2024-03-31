@@ -1,12 +1,19 @@
-import React from 'react';
-import {COLORS, SIZES, FONTS} from '../../../styles';
-import {ScrollView, StyleSheet, View, Text, Dimensions} from 'react-native';
-
+import React, { useEffect } from 'react';
+import { COLORS, SIZES, FONTS } from '../../../styles';
+import { ScrollView, StyleSheet, View, Text, Dimensions } from 'react-native';
+import { GetIncomeByMonth, GetExpenseByMonth } from '@store/mmkv';
 function MonthlyStatement() {
   const [income, setIncome] = React.useState(0);
   const [expense, setExpense] = React.useState(0);
+
+  useEffect(() => {
+    setIncome(GetIncomeByMonth(new Date().getFullYear(), new Date().getMonth() + 1));
+    setExpense(GetExpenseByMonth(new Date().getFullYear(), new Date().getMonth() + 1));
+  }, []);
   return (
-    <View>
+    <View style={{
+      marginTop: SIZES.padding
+    }}>
       <Text style={styles.componentTitle}>Monthly Statement</Text>
       <View style={styles.box}>
         <View style={styles.summaryView}>
@@ -17,7 +24,7 @@ function MonthlyStatement() {
             <Text style={styles.currentText}>$ {income - expense}</Text>
           </View>
         </View>
-        <View style={styles.divider} />
+
         {/* Income */}
         <View style={styles.summaryView}>
           <View style={styles.currencyLabelTextContainer}>
@@ -27,7 +34,7 @@ function MonthlyStatement() {
             <Text style={styles.currentText}>$ {income}</Text>
           </View>
         </View>
-        <View style={styles.divider} />
+
         {/* Expense */}
         <View style={styles.summaryView}>
           <View style={styles.currencyLabelTextContainer}>
@@ -37,6 +44,7 @@ function MonthlyStatement() {
             <Text style={styles.currentText}>$ {expense}</Text>
           </View>
         </View>
+
       </View>
     </View>
   );
@@ -65,8 +73,9 @@ const styles = StyleSheet.create({
   },
   componentTitle: {
     color: COLORS.black,
-    fontSize: SIZES.h1,
+    fontSize: SIZES.h2,
     marginLeft: SIZES.padding,
+    marginStart: SIZES.padding,
   },
   box: {
     backgroundColor: '#ffffff',
@@ -78,7 +87,9 @@ const styles = StyleSheet.create({
   },
   summaryView: {
     flexDirection: 'row',
-    borderColor: COLORS.white,
+
+    borderColor: 'gray',
+    borderBottomWidth: 0.2,
     marginBottom: 5,
   },
   currencyLabelText: {
@@ -93,6 +104,7 @@ const styles = StyleSheet.create({
   currencyLabelTextContainer: {
     flex: 2,
     alignItems: 'flex-start',
+    justifyContent: 'center',
   },
   currentTextContainer: {
     flex: 2,

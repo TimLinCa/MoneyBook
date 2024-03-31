@@ -45,11 +45,6 @@ class ExchangeRate {
   }
 }
 
-// const storage = new MMKV({
-//   id: 'MoneyBook-storage',
-//   encryptionKey: 'hunter2',
-// });
-
 const storage = new MMKV({
   id: 'MoneyBook-storage',
 });
@@ -61,11 +56,8 @@ const transactionInfo_base = 'transactionInfo_';
 const exchanged_rate = 'exchange_rate'
 export const Test = () => {
 
-  const namelist = GetInstitutionNameList();
-  namelist.forEach((name) => {
-    DeleteInstitutionInfo(name);
-  }
-  );
+
+  storage.delete(budgetInfo);
 };
 
 export const AddInstitutionToken = (institutionName, token) => {
@@ -241,7 +233,7 @@ export const GetExpenseTransactionHistoryByMonth = (institutionName, year, month
   let transactionInfoList = JSON.parse(storage.getString(tableName));
   let transactionHistory = transactionInfoList.filter((transaction) => transaction.date.includes(year + '-' + month) && transaction.amount < 0);
   return transactionHistory;
-}
+};
 
 export const GetExpenseByMonth = (year, month) => {
   month = ('0' + month).slice(-2);
@@ -252,7 +244,14 @@ export const GetExpenseByMonth = (year, month) => {
   });
   transactionHistory = transactionHistory.filter((transaction) => transaction.date.includes(year + '-' + month) && transaction.amount < 0);
 
-  return transactionHistory.sum((transaction) => transaction.amount);
+  let totalExpense = 0;
+  transactionHistory.forEach((transaction) => {
+    totalExpense += transaction.amount;
+  });
+
+  totalExpense = Math.abs(totalExpense);
+  totalExpense = Math.round(totalExpense * 100) / 100;
+  return totalExpense;
 };
 
 export const GetIncomeByMonth = (year, month) => {
@@ -263,12 +262,18 @@ export const GetIncomeByMonth = (year, month) => {
     transactionHistory = transactionHistory.concat(GetTransactionHistoryByMonth(institutionName, year, month));
   });
   transactionHistory = transactionHistory.filter((transaction) => transaction.date.includes(year + '-' + month) && transaction.amount > 0);
-  return transactionHistory.sum((transaction) => transaction.amount);
+
+  let totalIncome = 0;
+  transactionHistory.forEach((transaction) => {
+    totalIncome += transaction.amount;
+  });
+  totalIncome = Math.round(totalIncome * 100) / 100;
+  return totalIncome;
 };
 
 export const GetNetIncomeByMonth = (year, month) => {
   month = ('0' + month).slice(-2);
-  return GetIncomeByMonth(year, month) + GetExpenseByMonth(year, month);
+  return GetIncomeByMonth(year, month) - GetExpenseByMonth(year, month);
 };
 
 export const AddBudgetItem = (budgetName, budget) => {
@@ -284,6 +289,8 @@ export const AddBudgetItem = (budgetName, budget) => {
 };
 
 export const EditBudgetItem = (budgetName, budget) => {
+  budgetName = budgetName.replace(' ', '_');
+  budgetName = budgetName.toUpperCase();
   let budgetList = [];
   if (storage.contains(budgetInfo)) {
     budgetList = JSON.parse(storage.getString(budgetInfo));
@@ -296,7 +303,36 @@ export const EditBudgetItem = (budgetName, budget) => {
   }
 };
 
+export const DeleteBudgetItem = (budgetName) => {
+  budgetName = budgetName.replace(' ', '_');
+  budgetName = budgetName.toUpperCase();
+  let budgetList = [];
+  if (storage.contains(budgetInfo)) {
+    budgetList = JSON.parse(storage.getString(budgetInfo));
+    let index = budgetList.map(budgetItem => budgetItem.name).indexOf(budgetName);
+    if (index > -1) {
+      budgetList.splice(index, 1);
+    }
+    storage.set(budgetInfo, JSON.stringify(budgetList));
+  }
+};
+
+export const GetBudgetList = () => {
+  let budgetList = [];
+  if (storage.contains(budgetInfo)) {
+    budgetList = JSON.parse(storage.getString(budgetInfo));
+  }
+
+  budgetList.forEach((budgetItem) => {
+    budgetItem.name = budgetItem.name.replace('_', ' ');
+    budgetItem.name = budgetItem.name.charAt(0).toUpperCase() + budgetItem.name.slice(1).toLowerCase();
+  });
+
+  return budgetList;
+};
+
 export const getBudgetInfo = (year, month) => {
+  month = ('0' + month).slice(-2);
   let budgetList = [];
   if (storage.contains(budgetInfo)) {
     budgetList = JSON.parse(storage.getString(budgetInfo));
@@ -317,9 +353,36 @@ export const getBudgetInfo = (year, month) => {
     });
     totalAmount = Math.abs(totalAmount);
     budgetItem.amount = totalAmount;
+    budgetItem.name = budgetItem.name.replace('_', ' ');
+    budgetItem.name = budgetItem.name.charAt(0).toUpperCase() + budgetItem.name.slice(1).toLowerCase();
   });
 
   return budgetList;
+};
+
+export const GetExpenseCategoryList = (year, month) => {
+  month = ('0' + month).slice(-2);
+  let institutionNameList = GetInstitutionNameList();
+  let transactionHistory = [];
+  institutionNameList.forEach((institutionName) => {
+    transactionHistory = transactionHistory.concat(GetExpenseTransactionHistoryByMonth(institutionName, year, month));
+  });
+
+  let categoryList_temp = transactionHistory.reduce((categoryListSofar, { category, amount }) => {
+    if (!categoryListSofar[category]) { categoryListSofar[category] = 0; }
+    categoryListSofar[category] += amount;
+    return categoryListSofar;
+  }, {});
+  let categoryList = [];
+
+  for (const [key, value] of Object.entries(categoryList_temp)) {
+    let categoryName = key;
+    categoryName = categoryName.replace('_', ' ');
+    categoryName = categoryName.charAt(0).toUpperCase() + categoryName.slice(1).toLowerCase();
+    categoryList.push({ category: categoryName, amount: Math.abs(value) });
+  }
+
+  return categoryList;
 };
 
 export const getTotalBalanceByCurrency = () => {
@@ -329,7 +392,6 @@ export const getTotalBalanceByCurrency = () => {
     let accountInfo = GetLocalInstitutionAccountInfo(institutionName);
     accountInfoAll = accountInfoAll.concat(accountInfo.filter(account => account.type === 'depository'));
   });
-
 
   let accountInfoGroup = accountInfoAll.reduce((accountInfoGroupSofar, { currencyCode, balance }) => {
     if (!accountInfoGroupSofar[currencyCode]) { accountInfoGroupSofar[currencyCode] = []; }
@@ -402,4 +464,9 @@ export default {
   getExchangeRate,
   GetTransactionCursor,
   UpdateAccountBalance,
+  DeleteBudgetItem,
+  GetBudgetList,
+  GetIncomeByMonth,
+  GetExpenseByMonth,
+  GetExpenseCategoryList,
 };

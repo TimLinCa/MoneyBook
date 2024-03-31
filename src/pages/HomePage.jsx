@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
-
 import { Button } from '@rneui/themed';
 import { useState } from 'react';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -50,7 +49,8 @@ function HomePage({ navigation }) {
         hasMore = asyncTransaction.data.has_more;
       }
     }
-    UpdateLastAsyncTime(moment().tz(momenttz.tz.guess()).format('YYYY-MM-DD HH:mm:ss'));
+    const tz = await momenttz.tz.guess();
+    UpdateLastAsyncTime(moment().tz(tz).format('YYYY-MM-DD HH:mm:ss'));
     setIsAsync(false);
   };
 
@@ -97,13 +97,15 @@ function HomePage({ navigation }) {
 
     const renderAsyncDate = async () => {
       const currentDate_temp = new Date();
-      let monthString = moment().tz(momenttz.tz.guess()).format('MMM');
+      const tz = await momenttz.tz.guess();
+      let monthString = moment().tz(tz).format('MMM');
       let dateDayString = currentDate_temp.getDate();
-      let dayString = moment().tz(momenttz.tz.guess()).format('dddd');
+      let dayString = moment().tz(tz).format('dddd');
       dayString = dayString.substring(0, 3);
       let string = monthString + ', ' + dateDayString + '(' + dayString + ')';
       setCurrentDate(string);
       setLastAsyncText(moment(GetLastAsyncTime(), 'YYYY-MM-DD HH:mm:ss').fromNow());
+
     };
     const unsubscribe = navigation.addListener('focus', () => {
       renderTotalBalanceByCurrency();

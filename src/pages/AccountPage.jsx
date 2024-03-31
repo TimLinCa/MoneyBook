@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { COLORS, SIZES } from '@styles';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -7,10 +7,8 @@ import { useState, useEffect } from 'react';
 import { UpdateAccountBalance, GetTransactionCursor, GetInstitutionToken, AddInstitutionToken, AsyncInstitutionAccountInfo, GetInstitutionNameList, GetLocalInstitutionAccountInfo, Test, UpdateTransactionInfo } from '../store/mmkv';
 import AccountCard from '@components/account/AccountCard';
 
-import { PlaidLink, LinkExit, LinkSuccess } from 'react-native-plaid-link-sdk';
+import { PlaidLink } from 'react-native-plaid-link-sdk';
 import { Button } from '@rneui/base';
-import { NavigationContainer } from '@react-navigation/native';
-import { AddBudgetItem, getBudgetInfo } from '@store/mmkv';
 import axios from 'axios';
 const address = '10.0.0.153';
 axios.defaults.baseURL = `http://${address}:3005`;
