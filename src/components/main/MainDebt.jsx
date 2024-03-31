@@ -4,16 +4,16 @@ import { COLORS, SIZES, FONTS } from '@styles';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import { SafeAreaView } from 'react-native-safe-area-context';
-function MainDebt({ creditCardDebt, loanDebt }) {
+function MainDebt({ creditCardDebt }) {
     const [debt, setDebt] = React.useState(0);
     const [creditCard, setCreditCard] = React.useState(0);
-    const [loan, setLoan] = React.useState(0);
+
 
     useEffect(() => {
         setCreditCard(creditCardDebt);
         setDebt(creditCardDebt);
-        setLoan(loanDebt);
-    }, [creditCardDebt, loanDebt]);
+
+    }, [creditCardDebt]);
 
     return (
         <SafeAreaView style={styles.safeView}>
@@ -33,15 +33,6 @@ function MainDebt({ creditCardDebt, loanDebt }) {
                     </View>
                     <View style={styles.currentTextContainer} >
                         <Text style={styles.currentText}>$ {creditCard.toLocaleString()}</Text>
-                    </View>
-                </View>
-
-                <View style={styles.summaryView}>
-                    <View style={styles.currencyLabelTextContainer}>
-                        <Text style={styles.currencyLabelText}>Loan</Text>
-                    </View>
-                    <View style={styles.currentTextContainer} >
-                        <Text style={styles.currentText}>$ {loan.toLocaleString()}</Text>
                     </View>
                 </View>
             </View>

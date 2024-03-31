@@ -16,6 +16,31 @@ function AccountBar({ navigation, bankName, accountInfo }) {
         navigation.navigate('AccountInfo', { institutionName: { bankName }, accountInfoName: { accountName }, accountBalance: { accountBalance }, accountId: { accountId } });
     };
 
+    const getBalanceTextStyle = () => {
+        if (balance === 0) {
+            return styles.balanceTextLightGray;
+        }
+        if (type === 'depository') {
+            if (balance > 0) {
+                return styles.balanceTextGreen;
+            }
+            else {
+                return styles.balanceTextRed;
+            }
+        }
+
+        if (type === 'credit') {
+            if (balance < 0) {
+                return styles.balanceTextGreen;
+            }
+            else {
+                return styles.balanceTextRed;
+            }
+        }
+
+
+    };
+
     useEffect(() => {
         if (type === 'depository') {
             setIconName('bank');
@@ -24,7 +49,7 @@ function AccountBar({ navigation, bankName, accountInfo }) {
             setIconName('credit-card-outline');
         }
         else if (type === 'loan') {
-            setIconName('invoice-text-clock');
+            setIconName('checkbook');
         }
         else if (type === 'wallet') {
             setIconName('wallet');
@@ -32,7 +57,11 @@ function AccountBar({ navigation, bankName, accountInfo }) {
     }, [type]);
 
     useEffect(() => {
-        setAccountBalance(balance);
+        if (balance === undefined) { setAccountBalance(0); }
+        else {
+            setAccountBalance(balance);
+        }
+
         setAccountName(name + '(' + accountMask + ')');
         setAccountId(id);
         currencyCode === 'CAD' ? setCurrency('$') : setCurrency(currencyCode);
@@ -42,7 +71,7 @@ function AccountBar({ navigation, bankName, accountInfo }) {
         <TouchableOpacity onPress={barOnPress} style={styles.container}>
             <Icon style={styles.icon} size={25} name={iconName} />
             <Text style={styles.BarText}>{accountName}</Text>
-            <Text style={balance > 0 ? styles.balanceTextGreen : styles.balanceTextRed}>{currency === 'CAD' ? '$ ' : currency + ' '}{balance.toLocaleString()}</Text>
+            <Text style={getBalanceTextStyle()}>{currency === 'CAD' ? '$ ' : currency + ' '}{balance.toLocaleString()}</Text>
         </TouchableOpacity>
     );
 
@@ -93,6 +122,17 @@ const styles = StyleSheet.create({
         marginLeft: SIZES.padding,
         alignSelf: 'center',
         color: COLORS.red,
+        position: 'absolute',
+        right: 0,
+        marginRight: SIZES.padding,
+    },
+    balanceTextLightGray:
+    {
+        flex: 2,
+        fontSize: SIZES.body3,
+        marginLeft: SIZES.padding,
+        alignSelf: 'center',
+        color: COLORS.lightGray,
         position: 'absolute',
         right: 0,
         marginRight: SIZES.padding,

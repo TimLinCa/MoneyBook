@@ -49,8 +49,8 @@ app.post('/api/create_link_token', async (req, res, next) => {
         user: { client_user_id: 'user-id' },
         client_name: 'MoneyBook',
         language: 'en',
-        products: ['auth', 'assets'],
-        required_if_supported_products: ['transactions', 'liabilities'],
+        products: ['transactions'],
+        optional_products: ['auth', 'liabilities'],
         country_codes: ['CA'],
         android_package_name: process.env.PLAID_ANDROID_PACKAGE_NAME,
     };
@@ -113,6 +113,7 @@ app.post('/get_institution_name_by_Id', async function (req, res) {
 app.post('/asyncTransactions', async function (req, res) {
     let PlaidRequest = null;
     if (req.body.cursor == null) {
+        console.log('cursor is null');
         PlaidRequest =
         {
             access_token: req.body.access_token,
@@ -124,6 +125,8 @@ app.post('/asyncTransactions', async function (req, res) {
         };
     }
     else {
+        console.log('cursor is not null');
+        console.log(req.body.cursor);
         PlaidRequest =
         {
             access_token: req.body.access_token,

@@ -12,10 +12,11 @@ import MainBudget from '@components/main/MainBudget';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import moment from 'moment';
 var momenttz = require('moment-timezone');
-import { UpdateLastAsyncTime, GetLastAsyncTime, getTotalBalanceByCurrency, updateExchangedRate, getExchangeRate, getBudgetInfo, UpdateAccountBalance, GetTransactionCursor, GetInstitutionToken, AddInstitutionToken, AsyncInstitutionAccountInfo, GetInstitutionNameList, GetLocalInstitutionAccountInfo, Test, UpdateTransactionInfo } from '@store/mmkv';
+import { getTotalLiabilitiesByCurrency, UpdateLastAsyncTime, GetLastAsyncTime, getTotalBalanceByCurrency, updateExchangedRate, getExchangeRate, getBudgetInfo, UpdateAccountBalance, GetTransactionCursor, GetInstitutionToken, AddInstitutionToken, AsyncInstitutionAccountInfo, GetInstitutionNameList, GetLocalInstitutionAccountInfo, Test, UpdateTransactionInfo } from '@store/mmkv';
 import NetInfo from "@react-native-community/netinfo";
 import axios from 'axios';
-const address = '10.0.0.153';
+import { IP_ADDRESS } from '@env';
+const address = IP_ADDRESS;
 axios.defaults.baseURL = `http://${address}:3005`;
 //This page will show the user's summary of their accounts such as total balance and loan and budget information.
 
@@ -26,12 +27,10 @@ function HomePage({ navigation }) {
   const [usdBalance, setUsdBalance] = useState(0);
   const [othersBalance, setOthersBalance] = useState(0);
   const [creditDebt, setCreditDebt] = useState(0);
-  const [loanDebt, setLoanDebt] = useState(0);
   const [budgetList, setBudgetList] = useState([]);
   const [isAsync, setIsAsync] = useState(false);
   const [currentDate, setCurrentDate] = useState('');
   const [lastAsyncText, setLastAsyncText] = useState('');
-
   const asyncAccount = async () => {
     setIsAsync(true);
 
@@ -93,6 +92,20 @@ function HomePage({ navigation }) {
       setUsdBalance(usdBalance_temp);
       setOthersBalance(othersBalance_temp);
       setBudgetList(getBudgetInfo(new Date().getFullYear(), new Date().getMonth() + 1));
+
+      const TotalLiabilities = getTotalLiabilitiesByCurrency();
+      let creditDebt_temp = 0;
+      TotalLiabilities.forEach(tb => {
+        if (tb.currency === 'CAD') {
+          creditDebt_temp += tb.balance;
+        }
+        else {
+          const rate = getExchangeRate(tb.currency);
+          creditDebt_temp += tb.balance * rate;
+        }
+      });
+
+      setCreditDebt(creditDebt_temp);
     };
 
     const renderAsyncDate = async () => {
@@ -121,7 +134,7 @@ function HomePage({ navigation }) {
   return (
     <SafeAreaView style={{ flex: 1, paddingBottom: 10 }}>
       {renderHeader(asyncAccount, isAsync, currentDate, lastAsyncText)}
-      {renderSummaryInfo(cadBalance, usdBalance, othersBalance, creditDebt, loanDebt)}
+      {renderSummaryInfo(cadBalance, usdBalance, othersBalance, creditDebt)}
       {renderBudgetInfo(budgetList)}
     </SafeAreaView>
   );
@@ -129,7 +142,13 @@ function HomePage({ navigation }) {
 
 
 function renderHeader(asyncAccount, isAsync, currentDate, lastAsyncText) {
+  const TestButtonFunction = async () => {
+    Test();
 
+    //AddBudgetItem('FOOD_AND_DRINK', 3000);
+    // console.log(getBudgetInfo(new Date().getFullYear(), new Date().getMonth() + 1));
+
+  };
   return (
     <View
       style={
@@ -164,8 +183,8 @@ function renderHeader(asyncAccount, isAsync, currentDate, lastAsyncText) {
   );
 }
 
-function renderSummaryInfo(cadBalance, usdBalance, othersBalance, creditDebt, loanDebt) {
-  const netAsset = cadBalance + usdBalance + othersBalance - creditDebt - loanDebt;
+function renderSummaryInfo(cadBalance, usdBalance, othersBalance, creditDebt) {
+  const netAsset = cadBalance + usdBalance + othersBalance - creditDebt;
   return (
     <View style={styles.summaryInfo}>
       <View>
@@ -193,7 +212,7 @@ function renderSummaryInfo(cadBalance, usdBalance, othersBalance, creditDebt, lo
             }}
           >
             <Tab.Screen name="Asset" children={() => <MainAsset cadBalance={cadBalance} usdBalance={usdBalance} othersBalance={othersBalance} />} />
-            <Tab.Screen name="DEBT" children={() => <MainDebt creditCardDebt={creditDebt} loanDebt={loanDebt} />} />
+            <Tab.Screen name="DEBT" children={() => <MainDebt creditCardDebt={creditDebt} />} />
           </Tab.Navigator>
         </NavigationContainer>
       </View>

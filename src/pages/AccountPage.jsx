@@ -10,11 +10,10 @@ import RNPickerSelect from 'react-native-picker-select';
 import { PlaidLink } from 'react-native-plaid-link-sdk';
 import { Button } from '@rneui/base';
 import axios from 'axios';
-const address = '10.0.0.153';
+import { IP_ADDRESS } from '@env';
+const address = IP_ADDRESS;
 axios.defaults.baseURL = `http://${address}:3005`;
 //This page will show the user's account information and allow them to add or remove accounts.
-
-
 function AccountPage({ navigation }) {
     const [linkToken, setLinkToken] = useState(null);
     const [accountInfos, setAccountInfos] = useState([]);
@@ -29,7 +28,7 @@ function AccountPage({ navigation }) {
 
     const handelUnlinkInstitution = async () => {
         if (selectedUnlinkedInstitutionName != null) {
-            DeleteInstitutionInfo(selectedUnlinkedInstitutionName);
+            DeleteInstitutionInfo(selectedUnlinkedInstitutionName.value);
         }
         setInstitutionNameList(GetInstitutionNameList());
         setUnlinkModalVisible(false);
@@ -42,6 +41,7 @@ function AccountPage({ navigation }) {
 
     const asyncAccount = async (institutionName) => {
         const accToken = GetInstitutionToken(institutionName);
+
         const authRes = await axios.post('/async_balance', { access_token: accToken });
         UpdateAccountBalance(institutionName, authRes);
         let hasMore = true;
@@ -107,6 +107,7 @@ function RenderHeader(linkToken, setInstitutionNameList, unlinkButtonClick) {
                 styles.headerContainer
             }>
             <Text style={styles.headerText}>Account</Text>
+            <Button onPress={() => TestButtonFunction()}>Test1</Button>
             <TouchableOpacity style={styles.unlinkAccountButton} onPress={() => unlinkButtonClick()}>
                 <Icon name="link-off" size={30} color={COLORS.white} />
             </TouchableOpacity>
@@ -121,11 +122,10 @@ function RenderHeader(linkToken, setInstitutionNameList, unlinkButtonClick) {
                         try {
                             let accessTokenRes = await axios.post('/exchange_public_token', { public_token: success.publicToken });
                             AddInstitutionToken(institutionName, accessTokenRes.data.access_token);
-                            let authRes = await axios.post('/auth', { access_token: accessTokenRes.data.access_token });
-                            AsyncInstitutionAccountInfo(institutionName, authRes.data);
-
-                            let hasMore = true;
+                            const authRes = await axios.post('/async_balance', { access_token: accessTokenRes.data.access_token });
+                            UpdateAccountBalance(institutionName, authRes);
                             let cursor = null;
+                            let hasMore = true;
                             while (hasMore) {
                                 let asyncTransaction = await axios.post('/asyncTransactions', { access_token: accessTokenRes.data.access_token, cursor: cursor });
                                 UpdateTransactionInfo(institutionName, asyncTransaction.data.added, asyncTransaction.data.modified, asyncTransaction.data.removed, asyncTransaction.data.cursor);
@@ -181,7 +181,7 @@ function UnLinkAccountWindow(unlinkModalVisible, setUnlinkModalVisible, setSelec
                     <View style={styles.editHeader}>
                         <Text style={styles.ModalHeaderTitle}>Unlink Institution</Text>
                     </View>
-                    <View style={{ paddingBottom: 20, paddingLeft: 20, paddingRight: 20 }}>
+                    <View style={styles.ModalSelector}>
                         <RNPickerSelect
                             placeholder={{ label: 'Select Institution', value: null }}
                             onValueChange={value =>
@@ -195,10 +195,10 @@ function UnLinkAccountWindow(unlinkModalVisible, setUnlinkModalVisible, setSelec
                         />
 
                         <View style={styles.ModalButtonContainer}>
-                            <TouchableOpacity style={{ flex: 0, width: '50%', alignItems: 'center' }} onPress={() => handelUnlinkInstitution()}>
+                            <TouchableOpacity style={styles.ModalButton} onPress={() => handelUnlinkInstitution()}>
                                 <Text style={{ color: COLORS.green }}>Unlink</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity style={{ flex: 0, width: '50%', alignItems: 'center' }} onPress={() => setUnlinkModalVisible(false)}>
+                            <TouchableOpacity style={styles.ModalButton} onPress={() => setUnlinkModalVisible(false)}>
                                 <Text>Cancel</Text>
                             </TouchableOpacity>
                         </View>
@@ -324,6 +324,12 @@ const styles = StyleSheet.create({
     },
     ModalButtonContainer: {
         flexDirection: 'row',
+    },
+    ModalSelector: {
+        paddingBottom: 20, paddingLeft: 20, paddingRight: 20,
+    },
 
+    ModalButton: {
+        flex: 0, width: '50%', alignItems: 'center',
     },
 });

@@ -41,8 +41,8 @@ class Budget {
 
 class ExchangeRate {
   constructor(to_currency, rate) {
-    this.to_currency = to_currency,
-      this.rate = rate;
+    this.to_currency = to_currency;
+    this.rate = rate;
   }
 }
 
@@ -54,11 +54,10 @@ const InstitutionTokenTokenKey = 'InstitutionToken';
 const accountInfo_base = 'accountInfo_';
 const budgetInfo = 'budgetInfo';
 const transactionInfo_base = 'transactionInfo_';
-const exchanged_rate = 'exchange_rate'
+const exchanged_rate = 'exchange_rate';
 export const Test = () => {
 
-
-  storage.delete(budgetInfo);
+  console.log(storage.getAllKeys());
 };
 
 export const AddInstitutionToken = (institutionName, token) => {
@@ -123,10 +122,16 @@ export const UpdateAccountBalance = (institutionName, asyncBalanceRes) => {
   if (storage.contains(tableName)) {
     accountInfos = JSON.parse(storage.getString(tableName));
   }
-
+  console.log(asyncBalanceRes.data.accounts);
   asyncBalanceRes.data.accounts.forEach((account) => {
     let accountInfo = accountInfos.find((accountInformation) => accountInformation.id === account.account_id);
-    accountInfo.balance = account.balances.available;
+    if (accountInfo === undefined) {
+      accountInfo = new AccountInfo(account.account_id, account.type, account.name, account.mask, account.balances.current, account.balances.iso_currency_code);
+      accountInfos.push(accountInfo);
+    }
+    else {
+      accountInfo.balance = account.balances.current;
+    }
   });
   storage.set(tableName, JSON.stringify(accountInfos));
 };
@@ -134,8 +139,9 @@ export const UpdateAccountBalance = (institutionName, asyncBalanceRes) => {
 export const AsyncInstitutionAccountInfo = (institutionName, auth_getResult) => {
   const tableName = getAccountTableName(institutionName);
   let accountInfos = [];
+  console.log(auth_getResult.accounts);
   auth_getResult.accounts.forEach((account) => {
-    let accountInfo = new AccountInfo(account.account_id, account.type, account.name, account.mask, account.balances.available, account.balances.iso_currency_code);
+    let accountInfo = new AccountInfo(account.account_id, account.type, account.name, account.mask, account.balances.current, account.balances.iso_currency_code);
     accountInfos.push(accountInfo);
   });
   storage.set(tableName, JSON.stringify(accountInfos));
@@ -172,6 +178,7 @@ export const DeleteInstitutionInfo = (institutionName) => {
   let tokens = JSON.parse(storage.getString(InstitutionTokenTokenKey));
   tokens.splice(tokens.indexOf(tokens.find((token) => token.institutionName === institutionName)), 1);
   storage.set(InstitutionTokenTokenKey, JSON.stringify(tokens));
+
 };
 
 export const UpdateTransactionInfo = (institutionName, added, modified, removed, cursor) => {
@@ -199,7 +206,7 @@ export const UpdateTransactionInfo = (institutionName, added, modified, removed,
     transactionInfo.name = modified[i].name;
     transactionInfo.amount = modified[i].amount;
     transactionInfo.category = modified[i].personal_finance_category.primary;
-    if (modified[i].iso_currency_code === undefined || added[i].iso_currency_code === null) {
+    if (modified[i].iso_currency_code === undefined || modified[i].iso_currency_code === null) {
       const accountInfos = GetLocalInstitutionAccountInfo(institutionName);
       const accountInfo = accountInfos.find(account => account.id === modified[i].account_id);
       modified[i].iso_currency_code = accountInfo.currencyCode;
@@ -437,6 +444,31 @@ export const getTotalBalanceByCurrency = () => {
 
   return totalBalance;
 };
+
+export const getTotalLiabilitiesByCurrency = () => {
+  let institutionNameList = GetInstitutionNameList();
+  let accountInfoAll = [];
+  institutionNameList.forEach((institutionName) => {
+    let accountInfo = GetLocalInstitutionAccountInfo(institutionName);
+    accountInfoAll = accountInfoAll.concat(accountInfo.filter(account => account.type === 'credit'));
+  });
+
+  let accountInfoGroup = accountInfoAll.reduce((accountInfoGroupSofar, { currencyCode, balance }) => {
+    if (!accountInfoGroupSofar[currencyCode]) { accountInfoGroupSofar[currencyCode] = []; }
+    accountInfoGroupSofar[currencyCode].push({ balance });
+    return accountInfoGroupSofar;
+  }, {});
+
+  let totalBalance = [];
+
+  for (const [key, value] of Object.entries(accountInfoGroup)) {
+    let totalBalance_temp = 0;
+    value.forEach(v => { totalBalance_temp += v.balance; });
+    totalBalance.push({ currency: key, balance: totalBalance_temp });
+  }
+
+  return totalBalance;
+}
 
 export const updateExchangedRate = (rateList) => {
   let exchange_rate_list = [];

@@ -20,5 +20,10 @@ module.exports = {
         },
       },
     ],
+    ['module:react-native-dotenv', {
+      'envName': 'MONEYBOOK',
+      'moduleName': '@env',
+      'path': '.env',
+    }],
   ],
 };

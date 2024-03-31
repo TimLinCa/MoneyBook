@@ -28,7 +28,7 @@ function MonthlyStatement({ navigation }) {
             <Text style={styles.currencyLabelText}>Balance</Text>
           </View>
           <View style={styles.currentTextContainer}>
-            <Text style={styles.currentText}>$ {income - expense}</Text>
+            <Text style={styles.currentText}>$ {(income - expense).toLocaleString()}</Text>
           </View>
         </View>
 
@@ -38,7 +38,7 @@ function MonthlyStatement({ navigation }) {
             <Text style={styles.currencyLabelText}>Income</Text>
           </View>
           <View style={styles.currentTextContainer}>
-            <Text style={styles.currentText}>$ {income}</Text>
+            <Text style={styles.currentText}>$ {income.toLocaleString()}</Text>
           </View>
         </View>
 
@@ -48,7 +48,7 @@ function MonthlyStatement({ navigation }) {
             <Text style={styles.currencyLabelText}>Expense</Text>
           </View>
           <View style={styles.currentTextContainer}>
-            <Text style={styles.currentText}>$ {expense}</Text>
+            <Text style={styles.currentText}>$ {expense.toLocaleString()}</Text>
           </View>
         </View>
 

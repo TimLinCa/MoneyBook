@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
-import { VictoryPie, VictoryLegend, VictoryLabel } from 'victory-native';
+import { VictoryPie, VictoryLabel, VictoryTheme, VictoryChart, LineSegment } from 'victory-native';
 import { COLORS, SIZES, FONTS } from '../../../styles';
+import { PieChartColors } from '../../../utils/colors';
 import { ScrollView, StyleSheet, View, Text, Dimensions } from 'react-native';
 import { Svg } from 'react-native-svg';
 import { GetExpenseCategoryList, GetExpenseByMonth } from '@store/mmkv';
@@ -27,7 +28,6 @@ function DonutChart({ navigation }) {
         return {
           label: item.category,
           y: item.amount,
-          color: getRandomColor(),
         };
       });
       setData(categoryData);
@@ -54,21 +54,30 @@ function DonutChart({ navigation }) {
           styles.donutContainer
         }>
           <Svg width={300} height={300} >
+
             <VictoryPie
+              labelIndicator={<LineSegment style={styles.line} />}
+              labelRadius={115}
+
+              style={{
+                labels: { fontSize: 13 },
+              }}
               data={data}
               width={300} // Adjust width
               height={300} // Adjust height
               innerRadius={50} // Adjust inner radius to create a donut effect
-              colorScale={data.map(item => item.color)} // Custom color scale
+              colorScale={PieChartColors} // Custom color scale
+              animate={{ duration: 300 }}
               padAngle={1} // Adjust spacing between segments
 
             />
             <VictoryLabel
               textAnchor="middle"
-              style={{ fontSize: 20 }}
+              style={{ fontSize: 15 }}
               x={150} y={150}
               text={() => '$' + totalExpense}
             />
+
           </Svg>
         </View>
       </View>
@@ -84,6 +93,9 @@ const styles = StyleSheet.create({
   safeView: {
     flex: 1,
     height: '100%',
+  },
+  line: {
+    stroke: 'black', fill: 'none',
   },
   donutContainer: {
     height: 300,
