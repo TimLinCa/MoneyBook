@@ -47,7 +47,7 @@ function DonutChart({ navigation }) {
 
   return (
     <View style={{ flex: 1 }}>
-      <Text style={styles.componentTitle}>Expenses</Text>
+      <Text style={styles.componentTitle}>Expenses Categories</Text>
       <View style={styles.box}>
 
         <View style={

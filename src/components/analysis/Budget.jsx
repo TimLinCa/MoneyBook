@@ -142,7 +142,7 @@ function Budget() {
                     { label: 'Bank Fees', value: 'BANK_FEES' },
                     { label: 'Entertainment', value: 'ENTERTAINMENT' },
                     { label: 'Food and drink', value: 'FOOD_AND_DRINK' },
-                    { label: 'General merchandiseGENERAL_MERCHANDISE ', value: 'GENERAL_MERCHANDISE' },
+                    { label: 'General merchandise', value: 'GENERAL_MERCHANDISE' },
                     { label: 'General services', value: 'GENERAL_SERVICES' },
                     {
                       label: 'Government and non-profit',

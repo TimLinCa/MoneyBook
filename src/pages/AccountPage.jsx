@@ -107,7 +107,6 @@ function RenderHeader(linkToken, setInstitutionNameList, unlinkButtonClick) {
                 styles.headerContainer
             }>
             <Text style={styles.headerText}>Account</Text>
-            <Button onPress={() => TestButtonFunction()}>Test1</Button>
             <TouchableOpacity style={styles.unlinkAccountButton} onPress={() => unlinkButtonClick()}>
                 <Icon name="link-off" size={30} color={COLORS.white} />
             </TouchableOpacity>
