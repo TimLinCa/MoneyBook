@@ -7,8 +7,6 @@ import BarChart from '@components/analysis/BarChart';
 import LineChart from '@components/analysis/LineChart';
 import { GetIncomeByMonth, GetExpenseByMonth } from '@store/mmkv';
 import moment from 'moment';
-
-
 import {
   StyleSheet,
   View,
@@ -26,13 +24,18 @@ function Trend({ navigation }) {
       let incomeData_temp = [];
       let expenseData_temp = [];
       let balanceData_temp = [];
-      for (let i = -5; i <= 1; i++) {
-        const month = new Date().getMonth() + i;
-        let monthString = moment().month(month).format('MMM');
+      for (let i = -4; i <= 1; i++) {
+        let year = new Date().getFullYear();
+        let month = new Date().getMonth() + i;
+        if (month <= 0) {
+          month += 12;
+          year -= 1;
+        }
+        let monthString = moment().month(month - 1).format('MMM');
         monthString = monthString.substring(0, 3);
-        const income = GetIncomeByMonth(new Date().getFullYear(), month);
+        const income = GetIncomeByMonth(year, month);
         incomeData_temp.push({ month: monthString, amount: income });
-        const expense = GetExpenseByMonth(new Date().getFullYear(), month);
+        const expense = GetExpenseByMonth(year, month);
         expenseData_temp.push({ month: monthString, amount: expense });
         const balance = Math.round((income - expense) * 100) / 100;
         balanceData_temp.push({ month: monthString, amount: balance });

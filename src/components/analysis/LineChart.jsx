@@ -1,13 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { COLORS, SIZES, FONTS } from '../../../styles';
+import { COLORS, SIZES } from '../../../styles';
 import { VictoryLine, VictoryChart, VictoryTheme, VictoryScatter, VictoryAxis } from "victory-native";
 import {
-    ScrollView,
     StyleSheet,
     View,
-    Text,
-    Dimensions,
-    TouchableOpacity,
 } from 'react-native';
 
 function LineChart({ chartData, color }) {

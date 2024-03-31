@@ -2,14 +2,21 @@ import React, { useEffect } from 'react';
 import { COLORS, SIZES, FONTS } from '../../../styles';
 import { ScrollView, StyleSheet, View, Text, Dimensions } from 'react-native';
 import { GetIncomeByMonth, GetExpenseByMonth } from '@store/mmkv';
-function MonthlyStatement() {
+function MonthlyStatement({ navigation }) {
   const [income, setIncome] = React.useState(0);
   const [expense, setExpense] = React.useState(0);
 
   useEffect(() => {
+
+    const unsubscribe = navigation.addListener('focus', async () => {
+      setIncome(GetIncomeByMonth(new Date().getFullYear(), new Date().getMonth() + 1));
+      setExpense(GetExpenseByMonth(new Date().getFullYear(), new Date().getMonth() + 1));
+    });
+
     setIncome(GetIncomeByMonth(new Date().getFullYear(), new Date().getMonth() + 1));
     setExpense(GetExpenseByMonth(new Date().getFullYear(), new Date().getMonth() + 1));
-  }, []);
+    return unsubscribe;
+  }, [navigation]);
   return (
     <View style={{
       marginTop: SIZES.padding

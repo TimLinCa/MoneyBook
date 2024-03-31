@@ -20,13 +20,14 @@ class AccountInfo {
 }
 
 class TransactionInfo {
-  constructor(id, accountId, date, name, amount, category) {
+  constructor(id, accountId, date, name, amount, category, currencyCode) {
     this.id = id;
     this.accountId = accountId;
     this.date = date;
     this.name = name;
     this.amount = amount;
     this.category = category;
+    this.currencyCode = currencyCode;
   }
 }
 
@@ -182,7 +183,12 @@ export const UpdateTransactionInfo = (institutionName, added, modified, removed,
   }
 
   for (let i = 0; i < added.length; i++) {
-    let transactionInfo = new TransactionInfo(added[i].transaction_id, added[i].account_id, added[i].date, added[i].name, added[i].amount, added[i].personal_finance_category.primary);
+    if (added[i].iso_currency_code === undefined || added[i].iso_currency_code === null) {
+      const accountInfos = GetLocalInstitutionAccountInfo(institutionName);
+      const accountInfo = accountInfos.find(account => account.id === added[i].account_id);
+      added[i].iso_currency_code = accountInfo.currencyCode;
+    }
+    let transactionInfo = new TransactionInfo(added[i].transaction_id, added[i].account_id, added[i].date, added[i].name, added[i].amount, added[i].personal_finance_category.primary, added[i].iso_currency_code);
     transactionInfoList.push(transactionInfo);
   }
 
@@ -193,6 +199,12 @@ export const UpdateTransactionInfo = (institutionName, added, modified, removed,
     transactionInfo.name = modified[i].name;
     transactionInfo.amount = modified[i].amount;
     transactionInfo.category = modified[i].personal_finance_category.primary;
+    if (modified[i].iso_currency_code === undefined || added[i].iso_currency_code === null) {
+      const accountInfos = GetLocalInstitutionAccountInfo(institutionName);
+      const accountInfo = accountInfos.find(account => account.id === modified[i].account_id);
+      modified[i].iso_currency_code = accountInfo.currencyCode;
+    }
+    transactionInfo.currencyCode = modified[i].iso_currency_code;
   }
 
   for (let i = 0; i < removed.length; i++) {
@@ -243,7 +255,11 @@ export const GetExpenseByMonth = (year, month) => {
     transactionHistory = transactionHistory.concat(GetTransactionHistoryByMonth(institutionName, year, month));
   });
   transactionHistory = transactionHistory.filter((transaction) => transaction.date.includes(year + '-' + month) && transaction.amount < 0);
-
+  transactionHistory.forEach((transaction) => {
+    if (transaction.currencyCode !== 'CAD') {
+      transaction.amount = ConvertToCAD(transaction.currencyCode, transaction.amount);
+    }
+  });
   let totalExpense = 0;
   transactionHistory.forEach((transaction) => {
     totalExpense += transaction.amount;
@@ -255,14 +271,20 @@ export const GetExpenseByMonth = (year, month) => {
 };
 
 export const GetIncomeByMonth = (year, month) => {
+
   month = ('0' + month).slice(-2);
+
   let institutionNameList = GetInstitutionNameList();
   let transactionHistory = [];
   institutionNameList.forEach((institutionName) => {
     transactionHistory = transactionHistory.concat(GetTransactionHistoryByMonth(institutionName, year, month));
   });
   transactionHistory = transactionHistory.filter((transaction) => transaction.date.includes(year + '-' + month) && transaction.amount > 0);
-
+  transactionHistory.forEach((transaction) => {
+    if (transaction.currencyCode !== 'CAD') {
+      transaction.amount = ConvertToCAD(transaction.currencyCode, transaction.amount);
+    }
+  });
   let totalIncome = 0;
   transactionHistory.forEach((transaction) => {
     totalIncome += transaction.amount;
@@ -271,10 +293,7 @@ export const GetIncomeByMonth = (year, month) => {
   return totalIncome;
 };
 
-export const GetNetIncomeByMonth = (year, month) => {
-  month = ('0' + month).slice(-2);
-  return GetIncomeByMonth(year, month) - GetExpenseByMonth(year, month);
-};
+
 
 export const AddBudgetItem = (budgetName, budget) => {
   let budgetList = [];
@@ -341,12 +360,15 @@ export const getBudgetInfo = (year, month) => {
   let institutionNameList = GetInstitutionNameList();
   let transactionHistory = [];
   institutionNameList.forEach((institutionName) => {
-
     transactionHistory = transactionHistory.concat(GetExpenseTransactionHistoryByMonth(institutionName, year, month));
   });
   budgetList.forEach((budgetItem) => {
-    const transactionHistoryByACategory = transactionHistory.filter((transaction) => transaction.category === budgetItem.name);
-
+    let transactionHistoryByACategory = transactionHistory.filter((transaction) => transaction.category === budgetItem.name);
+    transactionHistoryByACategory.forEach((transaction) => {
+      if (transaction.currencyCode !== 'CAD') {
+        transaction.amount = ConvertToCAD(transaction.currencyCode, transaction.amount);
+      }
+    });
     let totalAmount = 0;
     transactionHistoryByACategory.forEach((transaction) => {
       totalAmount += transaction.amount;
@@ -366,6 +388,12 @@ export const GetExpenseCategoryList = (year, month) => {
   let transactionHistory = [];
   institutionNameList.forEach((institutionName) => {
     transactionHistory = transactionHistory.concat(GetExpenseTransactionHistoryByMonth(institutionName, year, month));
+  });
+
+  transactionHistory.forEach((transaction) => {
+    if (transaction.currencyCode !== 'CAD') {
+      transaction.amount = ConvertToCAD(transaction.currencyCode, transaction.amount);
+    }
   });
 
   let categoryList_temp = transactionHistory.reduce((categoryListSofar, { category, amount }) => {
@@ -428,13 +456,17 @@ export const updateExchangedRate = (rateList) => {
 };
 
 export const getExchangeRate = (currency) => {
+  if (currency === undefined) { return 1; }
   let exchange_rate_list = [];
   if (storage.contains(exchanged_rate)) {
     exchange_rate_list = JSON.parse(storage.getString(exchanged_rate));
   }
-
   return exchange_rate_list.find(rate => rate.to_currency === currency).rate;
 };
+
+function ConvertToCAD(currency, amount) {
+  return amount * getExchangeRate(currency);
+}
 
 
 function getAccountTableName(institutionName) {
@@ -469,4 +501,5 @@ export default {
   GetIncomeByMonth,
   GetExpenseByMonth,
   GetExpenseCategoryList,
+  ConvertToCAD,
 };

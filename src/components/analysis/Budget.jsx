@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
-import { COLORS, SIZES, FONTS } from '../../../styles';
+import { COLORS, SIZES } from '../../../styles';
 import {
-  ScrollView,
   StyleSheet,
   View,
   Text,
@@ -10,8 +9,6 @@ import {
   TextInput,
 } from 'react-native';
 import AddIcon from 'react-native-vector-icons/Feather';
-import PencilIcon from 'react-native-vector-icons/EvilIcons';
-import TrashIcon from 'react-native-vector-icons/EvilIcons';
 import RNPickerSelect from 'react-native-picker-select';
 import { AddBudgetItem, DeleteBudgetItem, GetBudgetList } from '../../store/mmkv';
 import { EditBudgetItem } from '../../store/mmkv';
@@ -30,12 +27,8 @@ function Budget() {
     value: null,
   });
 
-
-
-
   useEffect(() => {
     const budgetList = GetBudgetList();
-    console.log('retrieved budget list');
     budgetList.map(item => {
       item.key = item.name;
       item.value = item.budget;
@@ -146,23 +139,23 @@ function Budget() {
                     setNewBudgetItem({ ...newBudgetItem, key: value })
                   }
                   items={[
-                    { label: 'BANK_FEES', value: 'BANK_FEES' },
-                    { label: 'ENTERTAINMENT', value: 'ENTERTAINMENT' },
-                    { label: 'FOOD_AND_DRINK', value: 'FOOD_AND_DRINK' },
-                    { label: 'GENERAL_MERCHANDISE', value: 'GENERAL_MERCHANDISE' },
-                    { label: 'GENERAL_SERVICES', value: 'GENERAL_SERVICES' },
+                    { label: 'Bank Fees', value: 'BANK_FEES' },
+                    { label: 'Entertainment', value: 'ENTERTAINMENT' },
+                    { label: 'Food and drink', value: 'FOOD_AND_DRINK' },
+                    { label: 'General merchandiseGENERAL_MERCHANDISE ', value: 'GENERAL_MERCHANDISE' },
+                    { label: 'General services', value: 'GENERAL_SERVICES' },
                     {
-                      label: 'GOVERNMENT_AND_NON_PROFIT',
+                      label: 'Government and non-profit',
                       value: 'GOVERNMENT_AND_NON_PROFIT',
                     },
-                    { label: 'HOME_IMPROVEMENT', value: 'HOME_IMPROVEMENT' },
-                    { label: 'LOAN_PAYMENTS', value: 'LOAN_PAYMENTS' },
-                    { label: 'MEDICAL', value: 'MEDICAL' },
-                    { label: 'PERSONAL_CARE', value: 'PERSONAL_CARE' },
-                    { label: 'RENT_AND_UTILITIES', value: 'RENT_AND_UTILITIES' },
+                    { label: 'Home improvement', value: 'HOME_IMPROVEMENT' },
+                    { label: 'Loan payments', value: 'LOAN_PAYMENTS' },
+                    { label: 'Medical', value: 'MEDICAL' },
+                    { label: 'Personal care', value: 'PERSONAL_CARE' },
+                    { label: 'Rent and utilities', value: 'RENT_AND_UTILITIES' },
 
-                    { label: 'TRANSPORTATION', value: 'TRANSPORTATION' },
-                    { label: 'TRAVEL', value: 'TRAVEL' },
+                    { label: 'Transportation', value: 'TRANSPORTATION' },
+                    { label: 'Travel', value: 'TRAVEL' },
                   ]}
                 />
                 {/* Use TextInput for entering budget item value */}

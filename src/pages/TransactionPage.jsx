@@ -49,6 +49,7 @@ function RenderHeader(accountName, accountBalance, returnToAccountPage) {
             <View style={styles.balanceSpace}>
                 <Text style={styles.balanceText}>${accountBalance.toLocaleString()}</Text>
             </View>
+
         </View >
     );
 }

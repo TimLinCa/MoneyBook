@@ -15,7 +15,7 @@ function Analysis({ navigation }) {
     <SafeAreaView>
       <ScrollView contentContainerStyle={styles.scrollView}>
         <Header />
-        <MonthlyStatement />
+        <MonthlyStatement navigation={navigation} />
         <DonutChart navigation={navigation} />
         <Budget />
         <Trend navigation={navigation} />
