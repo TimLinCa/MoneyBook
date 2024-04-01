@@ -41,6 +41,19 @@ app.post('/get_exchange_rate', async (req, res) => {
     return res.json(exchangeRateList);
 });
 
+app.post('/transaction_get', async (req, res) => {
+    const PlaidResponse = await client.transactionsGet({
+        access_token: req.body.access_token,
+        start_date: req.body.start_date,
+        end_date: req.body.end_date,
+        options: {
+            count: 500,
+            offset: 0,
+        },
+    });
+    res.json(PlaidResponse.data);
+});
+
 //Creates a Link token and return it
 app.post('/api/create_link_token', async (req, res, next) => {
     let payload = {};
@@ -113,28 +126,25 @@ app.post('/get_institution_name_by_Id', async function (req, res) {
 app.post('/asyncTransactions', async function (req, res) {
     let PlaidRequest = null;
     if (req.body.cursor == null) {
-        console.log('cursor is null');
         PlaidRequest =
         {
             access_token: req.body.access_token,
             count: 100,
             options: {
-                include_original_description: false,
-                days_requested: 180,
+                include_original_description: true,
+
             },
         };
     }
     else {
-        console.log('cursor is not null');
-        console.log(req.body.cursor);
         PlaidRequest =
         {
             access_token: req.body.access_token,
             cursor: req.body.cursor,
             count: 100,
             options: {
-                include_original_description: false,
-                days_requested: 180,
+                include_original_description: true,
+
             },
         };
     }

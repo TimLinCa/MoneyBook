@@ -44,6 +44,7 @@ function AccountPage({ navigation }) {
 
         const authRes = await axios.post('/async_balance', { access_token: accToken });
         UpdateAccountBalance(institutionName, authRes);
+
         let hasMore = true;
         let cursor = GetTransactionCursor(institutionName);
         while (hasMore) {
@@ -52,6 +53,7 @@ function AccountPage({ navigation }) {
             cursor = asyncTransaction.data.cursor;
             hasMore = asyncTransaction.data.has_more;
         }
+
         setInstitutionNameList(GetInstitutionNameList());
     };
 
@@ -99,7 +101,10 @@ function RenderHeader(linkToken, setInstitutionNameList, unlinkButtonClick) {
         setInstitutionNameList(GetInstitutionNameList());
         //AddBudgetItem('FOOD_AND_DRINK', 3000);
         // console.log(getBudgetInfo(new Date().getFullYear(), new Date().getMonth() + 1));
+    };
 
+    const delay = (delayInMs) => {
+        return new Promise(resolve => setTimeout(resolve, delayInMs));
     };
     return (
         <View
@@ -123,10 +128,15 @@ function RenderHeader(linkToken, setInstitutionNameList, unlinkButtonClick) {
                             AddInstitutionToken(institutionName, accessTokenRes.data.access_token);
                             const authRes = await axios.post('/async_balance', { access_token: accessTokenRes.data.access_token });
                             UpdateAccountBalance(institutionName, authRes);
-                            let cursor = null;
+
+                            //Active webhook
+                            let asyncTransaction = await axios.post('/asyncTransactions', { access_token: accessTokenRes.data.access_token, cursor: cursor });
+                            UpdateTransactionInfo(institutionName, asyncTransaction.data.added, asyncTransaction.data.modified, asyncTransaction.data.removed, asyncTransaction.data.cursor);
+                            let cursor = asyncTransaction.data.cursor;
+                            await delay(3000);
                             let hasMore = true;
                             while (hasMore) {
-                                let asyncTransaction = await axios.post('/asyncTransactions', { access_token: accessTokenRes.data.access_token, cursor: cursor });
+                                asyncTransaction = await axios.post('/asyncTransactions', { access_token: accessTokenRes.data.access_token, cursor: cursor });
                                 UpdateTransactionInfo(institutionName, asyncTransaction.data.added, asyncTransaction.data.modified, asyncTransaction.data.removed, asyncTransaction.data.cursor);
                                 cursor = asyncTransaction.data.cursor;
                                 hasMore = asyncTransaction.data.has_more;
