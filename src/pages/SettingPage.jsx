@@ -96,12 +96,13 @@ const SettingPageScreen = ({navigation}) => {
           <View style={styles.container}>
             <Text style={[styles.text, {fontSize: 35}]}>
               <Icon
-                name="help-circle"
+                name="question"
                 size={40}
                 color="#999"
                 style={styles.icon}
               />
-              {'  '}Help and Support
+              {'  '}
+              Help and Support
             </Text>
             <Text style={{fontSize: 35}}>{'>'}</Text>
             {/* You can use '>' directly in the Text component */}
@@ -112,7 +113,7 @@ const SettingPageScreen = ({navigation}) => {
         <TouchableOpacity onPress={() => navigation.navigate('About')}>
           <View style={styles.container}>
             <Text style={[styles.text, {fontSize: 35}]}>
-              <Icon name="info" size={30} color="#999" style={styles.icon} />
+              <Icon name="info" size={35} color="#999" style={styles.icon} />
               {'   '}About
             </Text>
             <Text style={{fontSize: 35}}>{'>'}</Text>
