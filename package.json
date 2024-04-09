@@ -49,6 +49,7 @@
     "react-native-svg": "^15.1.0",
     "react-native-tab-view": "^3.5.2",
     "react-native-vector-icons": "^10.0.3",
+    "toggle-switch-react-native": "^3.3.0",
     "victory-native": "^37.0.0"
   },
   "devDependencies": {

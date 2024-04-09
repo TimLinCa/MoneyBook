@@ -2,7 +2,7 @@ This is a new [**React Native**](https://reactnative.dev) project, bootstrapped 
 
 # Overview
 
-MoneyBook is a finance app which can link to your bank accounts to get account information such as balance, Liabilities, and etc. This app summary the 
+MoneyBook is a finance app that can link to your bank accounts to retrieve information such as your balance and liabilities. This app summarizes all the information to provide users with insights.
 
 ## Step 1: Start Back-end Server
 
@@ -40,9 +40,9 @@ Now that you have successfully run the app.
 
 Navigate to the account page and click the plus button on the top right screen.
 
-For a Canadian account, use "custom_user1" and a non-empty password to log in.
+For a Canadian account, use "custom_user3" and a non-empty password to log in.
 
-For our account, use "custom_user2" and a non-empty password to log in.
+For a USD account, use "custom_user4" and a non-empty password to log in.
 
 
 # Troubleshooting
@@ -50,7 +50,7 @@ For our account, use "custom_user2" and a non-empty password to log in.
 If you encounter a CMAKE building error, please make sure the length of the project's path does not exceed 250 characters.
 
 
-# kILL Program on specific port
+# kill Program on specific port
 
 netstat -ano | findstr :<PORT>
 

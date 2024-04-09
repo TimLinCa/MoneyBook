@@ -21,7 +21,7 @@ function LineChart({ chartData, color }) {
                 domainPadding={{ x: 20 }} >
                 <VictoryAxis crossAxis />
                 <VictoryAxis dependentAxis crossAxis
-                    tickFormat={(t) => `${Math.round(t / 1000)}k`}
+                    tickFormat={(t) => `${((Math.round(t * 10) / 1000)) / 10}k`}
                 />
                 <VictoryLine style={{
                     data: { stroke: lineColor },

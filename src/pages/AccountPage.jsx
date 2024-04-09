@@ -8,6 +8,7 @@ import { DeleteInstitutionInfo, UpdateAccountBalance, GetTransactionCursor, GetI
 import AccountCard from '@components/account/AccountCard';
 import RNPickerSelect from 'react-native-picker-select';
 import { PlaidLink } from 'react-native-plaid-link-sdk';
+import NetInfo from "@react-native-community/netinfo";
 import { Button } from '@rneui/base';
 import axios from 'axios';
 import { IP_ADDRESS } from '@env';
@@ -21,9 +22,19 @@ function AccountPage({ navigation }) {
     const [unlinkModalVisible, setUnlinkModalVisible] = useState(false);
     const [selectedUnlinkedInstitutionName, setSelectedUnlinkedInstitutionName] = useState(null);
 
+
+
     async function fetchLinkToken() {
-        const res = await axios.post('/api/create_link_token');
-        setLinkToken(res.data.link_token);
+        let netConnect = false;
+        let IsInternetReachable = false;
+        await NetInfo.fetch().then(state => {
+            netConnect = state.isConnected;
+            IsInternetReachable = state.isInternetReachable;
+        });
+        if (netConnect && IsInternetReachable) {
+            const res = await axios.post('/api/create_link_token');
+            setLinkToken(res.data.link_token);
+        }
     }
 
     const handelUnlinkInstitution = async () => {
@@ -59,6 +70,7 @@ function AccountPage({ navigation }) {
 
     useEffect(() => {
         const unsubscribe = navigation.addListener('focus', () => {
+
             fetchLinkToken();
             setInstitutionNameList(GetInstitutionNameList());
         });
