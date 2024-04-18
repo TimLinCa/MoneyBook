@@ -38,7 +38,7 @@ function MainBudget({ name, max, min, value, barWidth }) {
             <Text style={styles.barLabel} >{name}</Text>
             <View style={styles.inner}>
                 <Progress.Bar height={25} borderRadius={10} progress={percentage} color={getBackgroundColor(percentage)} width={barWidth} borderColor={COLORS.lightGray} />
-                <Text style={styles.label}>{value}/{max}</Text>
+                <Text style={styles.label}>{value.toFixed(2)}/{max}</Text>
             </View>
         </View>
 
