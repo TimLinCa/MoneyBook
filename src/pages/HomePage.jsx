@@ -12,7 +12,7 @@ import MainBudget from '@components/main/MainBudget';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import moment from 'moment';
 var momenttz = require('moment-timezone');
-import { getTotalLiabilitiesByCurrency, UpdateLastAsyncTime, GetLastAsyncTime, getTotalBalanceByCurrency, updateExchangedRate, getExchangeRate, getBudgetInfo, UpdateAccountBalance, GetTransactionCursor, GetInstitutionToken, AddInstitutionToken, AsyncInstitutionAccountInfo, GetInstitutionNameList, GetLocalInstitutionAccountInfo, Test, UpdateTransactionInfo } from '@store/mmkv';
+import { InitialKey, getTotalLiabilitiesByCurrency, UpdateLastAsyncTime, GetLastAsyncTime, getTotalBalanceByCurrency, updateExchangedRate, getExchangeRate, getBudgetInfo, UpdateAccountBalance, GetTransactionCursor, GetInstitutionToken, AddInstitutionToken, AsyncInstitutionAccountInfo, GetInstitutionNameList, GetLocalInstitutionAccountInfo, Test, UpdateTransactionInfo } from '@store/mmkv';
 import NetInfo from "@react-native-community/netinfo";
 import axios from 'axios';
 import { IP_ADDRESS } from '@env';
@@ -21,7 +21,7 @@ axios.defaults.baseURL = `http://${address}:3005`;
 //This page will show the user's summary of their accounts such as total balance and loan and budget information.
 
 const Tab = createMaterialTopTabNavigator();
-
+InitialKey();
 function HomePage({ navigation }) {
   const [cadBalance, setCadBalance] = useState(0);
   const [usdBalance, setUsdBalance] = useState(0);
