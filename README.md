@@ -15,6 +15,13 @@ Home             |  Account | Analysis | Analysis
 <li>Expense Insights: Detailed analysis of income and spending patterns</li>
 </ul>
 
+# Technology
+<ul>
+<li>Framework: React Native</li>
+<li>Programming language: Javascript</li>
+<li>Database: MMKV</li>
+</ul>
+
 # How to start the demo
 ## Step 1: Start Back-end Server
 
