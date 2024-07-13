@@ -5,7 +5,7 @@ MoneyBook is a comprehensive financial management application that securely conn
 
 Home             |  Account | Analysis | Analysis
 :-------------------------:|:-------------------------:|:-------------------------:|:-------------------------:
-![Home Page](https://github.com/TimLinCa/MoneyBook/blob/main/assets/images/readme/Home.png)  | ![Account Page](assets\images\readme\Account.png "Account") | ![Analysis Page](assets\images\readme\Analysis.png "Analysis") | ![Analysis Page](assets\images\readme\Analysis2.png "Analysis")
+![Home Page](https://github.com/TimLinCa/MoneyBook/blob/main/assets/images/readme/Home.png)  | ![Account Page](https://github.com/TimLinCa/MoneyBook/blob/main/assets/images/readme/Account.png) | ![Analysis Page](https://github.com/TimLinCa/MoneyBook/blob/main/assets/images/readme/Analysis.png) | ![Analysis Page](https://github.com/TimLinCa/MoneyBook/blob/main/assets/images/readme/Analysis2.png)
 
 # Features
 <ul>
