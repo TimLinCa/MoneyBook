@@ -1,6 +1,7 @@
 
 import { MMKV } from 'react-native-mmkv';
-
+import * as Keychain from "react-native-keychain";
+import { MK_Token } from '@env';
 class InstitutionToken {
   constructor(institutionName, token) {
     this.institutionName = institutionName;
@@ -18,6 +19,7 @@ class AccountInfo {
     this.currencyCode = currencyCode;
   }
 }
+
 
 class TransactionInfo {
   constructor(id, accountId, date, name, amount, category, currencyCode) {
@@ -46,8 +48,23 @@ class ExchangeRate {
   }
 }
 
+// For storing key
+
+let keyToken = '';
+
+export const InitialKey = async () => {
+  const credentials = await Keychain.getGenericPassword();
+  if (credentials) {
+    console.log('Credentials successfully loaded for user ' + credentials.username + ' with key ' + credentials.password);
+    keyToken = credentials.password;
+  } else {
+    await Keychain.setGenericPassword('MoneyBook', MK_Token);
+  }
+};
+
 const storage = new MMKV({
   id: 'MoneyBook-storage',
+  encryptionKey: keyToken,
 });
 
 const InstitutionTokenTokenKey = 'InstitutionToken';
@@ -534,4 +551,5 @@ export default {
   GetExpenseByMonth,
   GetExpenseCategoryList,
   ConvertToCAD,
+  InitialKey,
 };
