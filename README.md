@@ -1,9 +1,21 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
-
 # Overview
 
-MoneyBook is a finance app that can link to your bank accounts to retrieve information such as your balance and liabilities. This app summarizes all the information to provide users with insights.
+MoneyBook is a comprehensive financial management application that securely connects to your bank accounts using [Plaid](https://plaid.com/)'s technology. By accessing your financial data, including account balances, liabilities, and transaction history, MoneyBook provides users with valuable insights and a clear overview of their financial situation. The app analyzes this information to offer personalized summaries and help users make informed financial decisions.
 
+
+Home             |  Account | Analysis | Analysis
+:-------------------------:|:-------------------------:|:-------------------------:|:-------------------------:
+![Home Page](assets\images\readme\Home.png "Home")  | ![Account Page](assets\images\readme\Account.png "Account") | ![Analysis Page](assets\images\readme\Analysis.png "Analysis") | ![Analysis Page](assets\images\readme\Analysis2.png "Analysis")
+
+# Features
+<ul>
+<li>Financial Overview: Comprehensive summary of your financial status</li>
+<li>Budget Tracking: Tools to create, manage, and monitor your budgets</li>
+<li>Account Integration: Seamless management of multiple bank accounts</li>
+<li>Expense Insights: Detailed analysis of income and spending patterns</li>
+</ul>
+
+# How to start the demo
 ## Step 1: Start Back-end Server
 
 First, you will need to open an new terminal and change direction to server folder.
@@ -48,10 +60,3 @@ For a USD account, use "custom_user4" and a non-empty password to log in.
 # Troubleshooting
 
 If you encounter a CMAKE building error, please make sure the length of the project's path does not exceed 250 characters.
-
-
-# kill Program on specific port
-
-netstat -ano | findstr :<PORT>
-
-taskkill /PID <PID> /F
